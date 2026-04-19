@@ -1,0 +1,16 @@
+.logo{
+     display: flex;
+     /* align-items: center;  */
+     height: 10vh;
+     width: auto;
+     padding: 6px;
+}
+.container{
+    min-height: calc(100vh - 11vh - 10vh);
+    /* giving minimum height to the class container, by substracting the height of header and footer from 100vh */
+}
+.flex-all-center{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
