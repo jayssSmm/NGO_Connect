@@ -1,2 +1,2 @@
 make registration page named "register.html"
-and login named "login.html"
+and login named "login.html" in templates
