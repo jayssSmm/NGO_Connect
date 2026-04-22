@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NGO Connect</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/utility.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="nav-left">
+                <div class="logo">
+                    <a href="index.html">
+                        <img src="images/NGO_Connect.png" alt="NGO Connect Logo">
+                    </a>
+                </div>
+                <ul class="nav-links">
+                    <li><a href="About.html">About</a></li>
+                    <li><a href="Contact.html">Contact</a></li>
+                </ul>
+            </div>
+            <div class="nav-center">
+                <div class="options">
+                    <a type="explore" class="option" href="Explore.html">Explore NGOs</a>
+                    <a type="donate" class="option" href="Donate.html">Donate</a>
+                    <a type="volunteer" class="option" href="Volunteer.html">Volunteer</a>
+                </div>
+            </div>
+            <div class="auth-buttons">
+                <a class="btn login" href="Login.html">Login</a>
+                <a class="btn signup" href="Signup.html">Sign Up</a>
+            </div>
+        </nav>
+    </header>
+    <main class="container">
+        <div class="graphic">
+            <img src="images/Graphic.png" alt="NGO Connect Graphic">
+        </div>
+        <div class="graphic2">
+            <img src="images/graphic2.png" alt="Stats">
+        </div>
+        <div class="write">
+            <p>Established in 2024, NGO Connect is a digital platform based in Kolkata that brings together NGOs, donors, and volunteers on a single, transparent interface. The platform enables users to discover verified NGOs, contribute through donations, and participate in meaningful volunteer opportunities across sectors such as education, healthcare, and social welfare.
+        <br>
+        <br>
+            NGO Connect aims to simplify the process of giving and engagement by providing clear insights into NGO needs and progress. By fostering collaboration between individuals and organizations, it works toward creating a more connected and impactful community-driven support system.</p>
+        </div>
+        <div class="graphic3">
+            <img src="images/Graphic3.png" alt="Impact">
+        </div>
+    </main>
+    <footer class="flex-all-center">
+        <!-- <p>&copy; 2026 NGO Connect. All rights reserved</p> -->
+         <p>Help as much as you can &#x1F60A;</p>
+    </footer>
+    <script>
+        function updateHeaderOnLoad() {
+            const userSession = sessionStorage.getItem('userSession');
+            const authButtons = document.querySelector('.auth-buttons');
+            
+            if (userSession && authButtons) {
+                const user = JSON.parse(userSession);
+                authButtons.innerHTML = `
+                    <div class="hamburger" onclick="toggleUserMenu()">☰ ${user.name || user.email}</div>
+                    <div class="user-menu" id="userMenu" style="display:none;">
+                        <a href="Dashboard.html">Dashboard</a>
+                        <a href="#" onclick="logout()">Logout</a>
+                    </div>
+                `;
+            }
+        }
+
+        function toggleUserMenu() {
+            const menu = document.getElementById('userMenu');
+            if (menu) {
+                menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+            }
+        }
+
+        function logout() {
+            sessionStorage.removeItem('userSession');
+            sessionStorage.removeItem('userType');
+            sessionStorage.removeItem('notifications');
+            alert('Logged out successfully!');
+            window.location.reload();
+        }
+
+        window.addEventListener('load', updateHeaderOnLoad);
+    </script>
+</body>
+</html>

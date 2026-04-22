@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/utility.css">
+</head>
+<body class="page-centered">
+    <div class="login-form">
+        <h2>Login</h2>
+        <form id="loginForm">
+            <input type="email" id="email" placeholder="Email" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <div class="forgot-password">
+                <a href="#" onclick="showForgotPassword()">Forgot Password?</a>
+            </div>
+            <button type="submit">Login</button>
+        </form>
+        <div class="or">-----------------OR--------------------------</div>
+        <button class="google-btn" onclick="continueWithGoogle()">Continue with Google</button>
+        <div class="signup-link">
+            <p>Don't have an account? <a href="Signup.html">Sign Up</a></p>
+        </div>
+
+        <div class="otp-section" id="otpSection">
+            <h3>Forgot Password</h3>
+            <input type="email" id="resetEmail" placeholder="Enter your email" required>
+            <button onclick="sendOTP()">Get OTP</button>
+            <input type="text" id="otp" placeholder="Enter OTP" style="display:none;">
+            <button onclick="verifyOTP()" style="display:none;" id="verifyBtn">Verify OTP</button>
+        </div>
+
+        <div class="reset-section" id="resetSection">
+            <h3>Reset Password</h3>
+            <input type="password" id="newPassword" placeholder="New Password" required>
+            <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
+            <button onclick="resetPassword()">Confirm</button>
+        </div>
+    </div>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            // Simulate login
+            const email = document.getElementById('email').value;
+            sessionStorage.setItem('userSession', JSON.stringify({
+                email: email,
+                loggedIn: true,
+                timestamp: new Date().getTime()
+            }));
+            sessionStorage.setItem('userType', 'registered');
+            alert('Logged in successfully!');
+            window.location.href = 'Dashboard.html';
+        });
+
+        function continueWithGoogle() {
+            // Simulate Google login
+            sessionStorage.setItem('userSession', JSON.stringify({
+                email: 'user@gmail.com',
+                loggedIn: true,
+                timestamp: new Date().getTime()
+            }));
+            sessionStorage.setItem('userType', 'registered');
+            alert('Logged in with Google!');
+            window.location.href = 'Dashboard.html';
+        }
+
+        function showForgotPassword() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('otpSection').style.display = 'block';
+        }
+
+        function sendOTP() {
+            const email = document.getElementById('resetEmail').value;
+            if (email) {
+                // Simulate sending OTP
+                alert('OTP sent to ' + email);
+                document.getElementById('otp').style.display = 'block';
+                document.getElementById('verifyBtn').style.display = 'block';
+            }
+        }
+
+        function verifyOTP() {
+            const otp = document.getElementById('otp').value;
+            if (otp) {
+                // Simulate verification
+                alert('OTP verified!');
+                document.getElementById('otpSection').style.display = 'none';
+                document.getElementById('resetSection').style.display = 'block';
+            }
+        }
+
+        function resetPassword() {
+            const newPass = document.getElementById('newPassword').value;
+            const confirmPass = document.getElementById('confirmPassword').value;
+            if (newPass === confirmPass && newPass) {
+                alert('Password reset successfully!');
+                window.location.href = 'Login.html';
+            } else {
+                alert('Passwords do not match.');
+            }
+        }
+    </script>
+</body>
+</html>

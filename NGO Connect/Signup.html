@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/utility.css">
+</head>
+<body class="page-centered">
+    <div class="signup-form">
+        <h2>Sign Up</h2>
+        <form id="signupForm">
+            <input type="text" id="fullName" placeholder="Full Name" required>
+            <input type="email" id="email" placeholder="Email" required>
+            <input type="password" id="password" placeholder="Create Password" required>
+            <button type="submit">Sign Up</button>
+        </form>
+        <div class="or">---------------------OR----------------------</div>
+        <button class="google-btn" onclick="signInWithGoogle()">Sign in with Google</button>
+        <div class="login-link">
+            <p>Already have an account? <a href="Login.html">Login</a></p>
+        </div>
+    </div>
+    <script>
+        document.getElementById('signupForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const fullName = document.getElementById('fullName').value;
+            const email = document.getElementById('email').value;
+            
+            // Store user session
+            sessionStorage.setItem('userSession', JSON.stringify({
+                name: fullName,
+                email: email,
+                loggedIn: true,
+                timestamp: new Date().getTime()
+            }));
+            sessionStorage.setItem('userType', 'registered');
+            
+            alert('Account created successfully!');
+            window.location.href = 'Dashboard.html';
+        });
+
+        function signInWithGoogle() {
+            // Simulate Google sign in
+            sessionStorage.setItem('userSession', JSON.stringify({
+                email: 'user@gmail.com',
+                loggedIn: true,
+                timestamp: new Date().getTime()
+            }));
+            sessionStorage.setItem('userType', 'registered');
+            alert('Signed in with Google!');
+            window.location.href = 'Dashboard.html';
+        }
+    </script>
+</body>
+</html>

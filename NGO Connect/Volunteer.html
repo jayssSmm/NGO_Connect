@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Volunteer with NGOs</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/utility.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="nav-left">
+                <div class="logo">
+                    <a href="index.html">
+                        <img src="images/NGO_Connect.png" alt="NGO Connect Logo">
+                    </a>
+                </div>
+                <ul class="nav-links">
+                    <li><a href="About.html">About</a></li>
+                    <li><a href="Contact.html">Contact</a></li>
+                </ul>
+            </div>
+            <div class="nav-center">
+                <div class="options">
+                    <a type="explore" class="option" href="Explore.html">Explore NGOs</a>
+                    <a type="donate" class="option" href="Donate.html">Donate</a>
+                    <a type="volunteer" class="option" href="Volunteer.html">Volunteer</a>
+                </div>
+            </div>
+            <div class="auth-buttons">
+                <a class="btn login" href="Login.html">Login</a>
+                <a class="btn signup" href="Signup.html">Sign Up</a>
+            </div>
+        </nav>
+    </header>
+    <main>
+        <div class="bg">
+            <div class="search">
+                <input type="text" id="searchInput" placeholder="Search NGO">
+                <button onclick="searchNGOs()">Search</button>
+            </div>
+            <div class="ngo-list" id="ngoList">
+                <!-- NGO list -->
+            </div>
+            <div class="volunteer-section" id="volunteerSection">
+                <h3>Volunteer with <span id="ngoName"></span></h3>
+                <textarea id="skills" placeholder="Enlist your skills (e.g., teaching children, helping elderly, cleaning)"></textarea>
+                <button onclick="applyVolunteer()">Request to Volunteer</button>
+            </div>
+        </div>
+    </main>
+    <footer>
+        <p>&copy; 2024 NGO Connect. All rights reserved.</p>
+    </footer>
+    <script>
+        let currentNGO = null;
+        let isLoggedIn = false;
+        
+        const ngos = [
+            { name: 'Green Earth NGO', location: 'Kolkata' },
+            { name: 'Helping Hands', location: 'Delhi' },
+            { name: 'Child Care Foundation', location: 'Mumbai' },
+        ];
+
+        // Check login status on page load
+        function checkLoginStatus() {
+            const userSession = sessionStorage.getItem('userSession');
+            if (userSession) {
+                isLoggedIn = true;
+            }
+        }
+
+        function searchNGOs() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = ngos.filter(ngo => ngo.name.toLowerCase().includes(query));
+            displayNGOs(filtered);
+        }
+
+        function displayNGOs(ngos) {
+            const list = document.getElementById('ngoList');
+            list.innerHTML = '';
+            ngos.forEach(ngo => {
+                const item = document.createElement('div');
+                item.className = 'ngo-item';
+                item.innerHTML = `<h4>${ngo.name}</h4><p>Location: ${ngo.location}</p>`;
+                item.onclick = () => selectNGO(ngo);
+                list.appendChild(item);
+            });
+        }
+
+        function selectNGO(ngo) {
+            currentNGO = ngo;
+            document.getElementById('ngoName').textContent = ngo.name;
+            document.getElementById('volunteerSection').style.display = 'block';
+        }
+
+        function applyVolunteer() {
+            if (!isLoggedIn) {
+                alert('Please log in or sign up to apply for volunteering.');
+                return;
+            }
+            
+            const skills = document.getElementById('skills').value;
+            if (skills.trim()) {
+                alert('Application sent to ' + currentNGO.name + '. You will be notified of acceptance/rejection on your dashboard and email.');
+            } else {
+                alert('Please enlist your skills.');
+            }
+        }
+
+        window.onload = function() {
+            checkLoginStatus();
+            displayNGOs(ngos);
+            updateHeaderOnLoad();
+        };
+
+        function updateHeaderOnLoad() {
+            const userSession = sessionStorage.getItem('userSession');
+            const authButtons = document.querySelector('.auth-buttons');
+            
+            if (userSession && authButtons) {
+                const user = JSON.parse(userSession);
+                authButtons.innerHTML = `
+                    <div class="hamburger" onclick="toggleUserMenu()">☰ ${user.name || user.email}</div>
+                    <div class="user-menu" id="userMenu" style="display:none;">
+                        <a href="Dashboard.html">Dashboard</a>
+                        <a href="#" onclick="logout()">Logout</a>
+                    </div>
+                `;
+            }
+        }
+
+        function toggleUserMenu() {
+            const menu = document.getElementById('userMenu');
+            if (menu) {
+                menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+            }
+        }
+
+        function logout() {
+            sessionStorage.removeItem('userSession');
+            sessionStorage.removeItem('userType');
+            sessionStorage.removeItem('notifications');
+            alert('Logged out successfully!');
+            window.location.reload();
+        }
+    </script>
+</body>
+</html>

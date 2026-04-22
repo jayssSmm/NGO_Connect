@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/utility.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="nav-left">
+                <div class="logo">
+                    <a href="index.html">
+                        <img src="images/NGO_Connect.png" alt="NGO Connect Logo">
+                    </a>
+                </div>
+                <ul class="nav-links">
+                    <li><a href="About.html">About</a></li>
+                    <li><a href="Contact.html">Contact</a></li>
+                </ul>
+            </div>
+            <div class="nav-center">
+                <div class="options">
+                    <a type="explore" class="option" href="Explore.html">Explore NGOs</a>
+                    <a type="donate" class="option" href="Donate.html">Donate</a>
+                    <a type="volunteer" class="option" href="Volunteer.html">Volunteer</a>
+                </div>
+            </div>
+            <div class="auth-buttons">
+                <a class="btn login" href="Login.html">Login</a>
+                <a class="btn signup" href="Signup.html">Sign Up</a>
+            </div>
+        </nav>
+    </header>
+    <main class="contact-container">
+        <div class="contact-form">
+        <h2>Contact Us</h2>
+        <div class="contact-info">
+            <p><strong>Email:</strong> info@ngoconnect.org</p>
+            <p><strong>Phone:</strong> +91 12345 67890</p>
+            <p><strong>Working Address:</strong> 123 NGO Street, Kolkata, West Bengal, India - 700001</p>
+            <p><strong>Operating Hours:</strong> Monday to Friday, 9 AM - 6 PM</p>
+            <p><strong>Support:</strong> For any queries, feel free to reach out. We aim to respond within 24 hours.</p>
+        </div>
+        <form id="contactForm">
+            <input type="text" placeholder="Your Name" required>
+            <input type="email" placeholder="Your Email" required>
+            <textarea placeholder="Your Message" rows="5" required></textarea>
+            <button type="submit">Send Message</button>
+        </form>
+        </div>
+    </main>
+    <script>
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Message sent successfully!');
+        });
+
+        function updateHeaderOnLoad() {
+            const userSession = sessionStorage.getItem('userSession');
+            const authButtons = document.querySelector('.auth-buttons');
+            
+            if (userSession && authButtons) {
+                const user = JSON.parse(userSession);
+                authButtons.innerHTML = `
+                    <div class="hamburger" onclick="toggleUserMenu()">☰ ${user.name || user.email}</div>
+                    <div class="user-menu" id="userMenu" style="display:none;">
+                        <a href="Dashboard.html">Dashboard</a>
+                        <a href="#" onclick="logout()">Logout</a>
+                    </div>
+                `;
+            }
+        }
+
+        function toggleUserMenu() {
+            const menu = document.getElementById('userMenu');
+            if (menu) {
+                menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+            }
+        }
+
+        function logout() {
+            sessionStorage.removeItem('userSession');
+            sessionStorage.removeItem('userType');
+            sessionStorage.removeItem('notifications');
+            alert('Logged out successfully!');
+            window.location.reload();
+        }
+
+        window.addEventListener('load', updateHeaderOnLoad);
+    </script>
+</body>
+</html>
