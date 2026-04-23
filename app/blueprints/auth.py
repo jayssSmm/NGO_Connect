@@ -1,17 +1,11 @@
 from flask import Blueprint,request,render_template,redirect
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask_jwt_extended import create_access_token
+from app.models.user import User
+from app.extensions import db
 
 bp = Blueprint("auth",__name__)
 
-'''
-note
-here db is the db client, that we will use (will be declared in extensions.py)
-User is the user table 
-create_access_token is jwt token that we will use
-we not store the password in db, rather we store password hash
-right now we are storing the password hash in user cookie
-'''
 
 @bp.route("/register",methods=['GET','POST'])
 def register():
@@ -24,7 +18,7 @@ def register():
     if not email or not password:
         return redirect("/register")
     
-    '''existing_user = db.session.execute(
+    existing_user = db.session.execute(
         db.select(User).filter_by(email=email)
     ).scalar_one_or_none()
 
@@ -37,7 +31,7 @@ def register():
 
     access_token = create_access_token(identity=str(new_user.id))
 
-    response.set_cookie('access_token_cookie',access_token,httponly=True)'''
+    response.set_cookie('access_token_cookie',access_token,httponly=True)
 
     response=redirect("/")
     return response
@@ -51,7 +45,7 @@ def login():
     email = request.form.get('email', '').strip().lower()
     password = request.form.get('password', '')
 
-    '''if not email or not password:
+    if not email or not password:
         return redirect("/login")
 
     user = db.session.execute(
@@ -61,9 +55,9 @@ def login():
     if not user or not check_password_hash(user.password_hash, password):
         return redirect("/login")
 
-    access_token = create_access_t'oken(identity=str(user.id))
+    access_token = create_access_token(identity=str(user.id))
 
     response.set_cookie('access_token_cookie',access_token,httponly=True)
-'''
+
     response=redirect("/")
     return response
