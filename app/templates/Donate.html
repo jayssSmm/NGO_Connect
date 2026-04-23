@@ -7,6 +7,18 @@
     <link rel="stylesheet" href="../static/styles.css">
     <link rel="stylesheet" href="../static/utility.css">
 </head>
+<div id="auth-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:999; align-items:center; justify-content:center;">
+    <div style="background:#fff; border-radius:12px; padding:2rem 2.5rem; max-width:360px; width:90%; text-align:center; box-shadow: 0 8px 32px rgba(0,0,0,0.18);">
+        <div style="font-size:2rem; margin-bottom:0.75rem;">🔒</div>
+        <h3 style="margin:0 0 0.5rem; font-size:1.1rem; font-weight:600;">Login Required</h3>
+        <p style="margin:0 0 1.5rem; font-size:0.9rem; color:#666;">You need to be logged in to access this feature.</p>
+        <div style="display:flex; gap:0.75rem; justify-content:center;">
+            <a href="/login" style="padding:0.55rem 1.4rem; background:#2563eb; color:#fff; border-radius:7px; text-decoration:none; font-size:0.9rem; font-weight:500;">Login</a>
+            <a href="/register" style="padding:0.55rem 1.4rem; background:#f3f4f6; color:#374151; border-radius:7px; text-decoration:none; font-size:0.9rem; font-weight:500;">Sign Up</a>
+            <button onclick="closeModal()" style="padding:0.55rem 1.1rem; border:1px solid #e5e7eb; border-radius:7px; background:none; cursor:pointer; font-size:0.9rem; color:#6b7280;">Cancel</button>
+        </div>
+    </div>
+</div>
 <body>
     <header>
         <nav>
@@ -55,7 +67,7 @@
                 </div>
                 <div>
                     <h4>Donate Items</h4>
-                    <textarea id="items" placeholder="List items you want to donate"></textarea>
+                    <textarea id="items" onclick="donateItemsBox()" placeholder="List items you want to donate"></textarea>
                     <button onclick="donateItems()">Donate Items</button>
                 </div>
             </div>
@@ -64,5 +76,6 @@
     <footer>
         <p>&copy; 2024 NGO Connect. All rights reserved.</p>
     </footer>
+    <script src="../static/Donate.js"></script>
 </body>
 </html>

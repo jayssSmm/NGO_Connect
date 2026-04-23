@@ -2,9 +2,9 @@
     let currentNGO = null;
 
     const ngos = [
-        { name: 'Green Earth NGO', location: 'Kolkata' },
-        { name: 'Helping Hands', location: 'Delhi' },
-        { name: 'Child Care Foundation', location: 'Mumbai' },
+        { name: 'Green Earth NGO', location: 'Kolkata', scannerId: 'GE001' },
+        { name: 'Helping Hands', location: 'Delhi', scannerId: 'HH002' },
+        { name: 'Child Care Foundation', location: 'Mumbai', scannerId: 'CCF003' },
     ];
 
     async function checkAuth() {
@@ -19,7 +19,7 @@
     function searchNGOs() {
         const query = document.getElementById('searchInput').value.toLowerCase();
         const filtered = ngos.filter(ngo => ngo.name.toLowerCase().includes(query));
-        document.getElementById('volunteerSection').style.display = 'none';
+        document.getElementById('donationSection').style.display = 'none'
         displayNGOs(filtered);
     }
 
@@ -38,46 +38,72 @@
     function selectNGO(ngo) {
         currentNGO = ngo;
         document.getElementById('ngoName').textContent = ngo.name;
-        document.getElementById('volunteerSection').style.display = 'block';
+        document.getElementById('donationSection').style.display = 'block';
     }
 
-    async function applyVolunteerBox() {
-        const authenticated = await checkAuth();
-        if (!authenticated) {
-            showModal();
+    async function donateMoney() {
+
+        const amount = document.getElementById('amount').value;
+        if (!amount || amount < 1) {
+            alert('Minimum donation is 1 INR.');
             return;
         }
+        showRazorpayScanner(currentNGO, amount);
     }
 
-    async function applyVolunteer() {
-        const authenticated = await checkAuth();
-        if (!authenticated) {
-            showModal();
-            return;
-        }
+    function showRazorpayScanner(ngo, amount) {
+        const scannerCode = `
+RAZORPAY_QR_CODE_${ngo.scannerId}
+Amount: ${amount} INR
+NGO: ${ngo.name}
+Scan this code with any UPI app to proceed with payment.
 
-        const skills = document.getElementById('skills').value;
-        if (skills.trim()) {
-            alert('Application sent to ' + currentNGO.name + '. You will be notified of acceptance/rejection on your dashboard and email.');
+Dummy QR: [QR_${ngo.scannerId}_${Date.now()}]
+        `;
+        alert('Razorpay Dummy Scanner for ' + ngo.name + ':\n\n' + scannerCode + '\n\nAfter scanning and payment, you will receive confirmation.');
+        setTimeout(() => processMoneyDonation(ngo, amount), 500);
+    }
+
+    async function processMoneyDonation(ngo, amount) {
+        const authenticated = await checkAuth();
+        let message = `Payment of ${amount} INR sent to ${ngo.name}. `;
+
+        if (authenticated) {
+            message += 'Confirmation received on both website and payment app.';
+            alert(message);
         } else {
-            alert('Please enlist your skills.');
+            message += 'Confirmation received on payment app.';
+            alert(message);
         }
+
+        document.getElementById('amount').value = '';
     }
 
-    // donate box click guard
-    async function handleDonateClick(e) {
-        e.preventDefault();
+    async function donateItemsBox(){
         const authenticated = await checkAuth();
         if (!authenticated) {
             showModal();
             return;
         }
-        window.location.href = '/donate';
+    }
+
+    async function donateItems() {
+        const authenticated = await checkAuth();
+        if (!authenticated) {
+            showModal();
+            return;
+        }
+
+        const items = document.getElementById('items').value;
+        if (items.trim()) {
+            alert('Item list sent to ' + currentNGO.name + '. You will be notified of acceptance/rejection on your dashboard and email.');
+        } else {
+            alert('Please list items to donate.');
+        }
     }
 
     function showModal() {
-        const m = document.getElementById('auth-modal');
-        m.style.display = 'flex';
+        document.getElementById('auth-modal').style.display = 'flex';
     }
 
     function closeModal() {
@@ -87,7 +113,6 @@
     async function updateHeaderOnLoad() {
         const authenticated = await checkAuth();
         const authButtons = document.querySelector('.auth-buttons');
-
         if (authenticated && authButtons) {
             authButtons.innerHTML = `
                 <div class="hamburger" onclick="toggleUserMenu()">☰ My Account</div>
@@ -110,16 +135,7 @@
         displayNGOs(ngos);
         updateHeaderOnLoad();
 
-        // attach donate guard to any element with class="donate"
-        document.querySelectorAll('.donate').forEach(el => {
-            el.addEventListener('click', handleDonateClick);
+        document.getElementById('auth-modal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
         });
-
-        // close modal on backdrop click
-        const modal = document.getElementById('auth-modal');
-        if (modal) {
-            modal.addEventListener('click', function(e) {
-                if (e.target === this) closeModal();
-            });
-        }
     };
