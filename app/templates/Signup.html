@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign Up</title>
-    <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="css/utility.css">
+    <link rel="stylesheet" href="../static/styles.css">
+    <link rel="stylesheet" href="../static/utility.css">
 </head>
 <body class="page-centered">
     <div class="signup-form">
         <h2>Sign Up</h2>
-        <form id="signupForm">
+        <form id="signupForm" action="/register" method="post">
             <input type="text" id="fullName" placeholder="Full Name" required>
             <input type="email" id="email" placeholder="Email" required>
             <input type="password" id="password" placeholder="Create Password" required>
@@ -19,7 +19,7 @@
         <div class="or">---------------------OR----------------------</div>
         <button class="google-btn" onclick="signInWithGoogle()">Sign in with Google</button>
         <div class="login-link">
-            <p>Already have an account? <a href="Login.html">Login</a></p>
+            <p>Already have an account? <a href="/login">Login</a></p>
         </div>
     </div>
     <script>

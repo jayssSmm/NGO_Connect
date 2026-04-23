@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
-    <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="css/utility.css">
+    <link rel="stylesheet" href="../static/styles.css">
+    <link rel="stylesheet" href="../static/utility.css">
 </head>
 <body class="page-centered">
     <div class="login-form">
         <h2>Login</h2>
-        <form id="loginForm">
+        <form id="loginForm" action="/login" method="post">
             <input type="email" id="email" placeholder="Email" required>
             <input type="password" id="password" placeholder="Password" required>
             <div class="forgot-password">
@@ -21,7 +21,7 @@
         <div class="or">-----------------OR--------------------------</div>
         <button class="google-btn" onclick="continueWithGoogle()">Continue with Google</button>
         <div class="signup-link">
-            <p>Don't have an account? <a href="Signup.html">Sign Up</a></p>
+            <p>Don't have an account? <a href="/register">Sign Up</a></p>
         </div>
 
         <div class="otp-section" id="otpSection">

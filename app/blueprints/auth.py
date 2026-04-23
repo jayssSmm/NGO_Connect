@@ -13,10 +13,10 @@ we not store the password in db, rather we store password hash
 right now we are storing the password hash in user cookie
 '''
 
-@bp.route("/register",method=['GET','POST'])
+@bp.route("/register",methods=['GET','POST'])
 def register():
     if request.method=='GET':
-        return render_template('register.html')
+        return render_template("Signup.html")
     
     email = request.form.get('email', '').strip().lower()
     password = request.form.get('password', '')
@@ -24,7 +24,7 @@ def register():
     if not email or not password:
         return redirect("/register")
     
-    existing_user = db.session.execute(
+    '''existing_user = db.session.execute(
         db.select(User).filter_by(email=email)
     ).scalar_one_or_none()
 
@@ -37,21 +37,21 @@ def register():
 
     access_token = create_access_token(identity=str(new_user.id))
 
-    response=redirect("/")
-    response.set_cookie('access_token_cookie',access_token,httponly=True)
+    response.set_cookie('access_token_cookie',access_token,httponly=True)'''
 
+    response=redirect("/")
     return response
 
 
 @bp.route('/login',methods=['POST','GET'])
 def login():
     if request.method == 'GET':
-        return render_template('login.html')
+        return render_template('Login.html')
 
     email = request.form.get('email', '').strip().lower()
     password = request.form.get('password', '')
 
-    if not email or not password:
+    '''if not email or not password:
         return redirect("/login")
 
     user = db.session.execute(
@@ -61,9 +61,9 @@ def login():
     if not user or not check_password_hash(user.password_hash, password):
         return redirect("/login")
 
-    access_token = create_access_token(identity=str(user.id))
+    access_token = create_access_t'oken(identity=str(user.id))
 
-    response=redirect("/")
     response.set_cookie('access_token_cookie',access_token,httponly=True)
-
+'''
+    response=redirect("/")
     return response
