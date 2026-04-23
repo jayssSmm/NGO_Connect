@@ -11,6 +11,7 @@ bp = Blueprint("auth",__name__)
 def register():
     if request.method=='GET':
         return render_template("Signup.html")
+    print('hit')
     
     email = request.form.get('email', '').strip().lower()
     password = request.form.get('password', '')
@@ -23,17 +24,17 @@ def register():
     ).scalar_one_or_none()
 
     if existing_user:
-        return redirect("/regsiter")
+        return redirect("/register")
     
     new_user = User(email=email, password_hash=generate_password_hash(password))
     db.session.add(new_user)
     db.session.commit()
 
-    access_token = create_access_token(identity=str(new_user.id))
+    access_token = create_access_token(identity=str(new_user.user_id))
+    
+    response=redirect("/")
 
     response.set_cookie('access_token_cookie',access_token,httponly=True)
-
-    response=redirect("/")
     return response
 
 
@@ -55,9 +56,9 @@ def login():
     if not user or not check_password_hash(user.password_hash, password):
         return redirect("/login")
 
-    access_token = create_access_token(identity=str(user.id))
-
-    response.set_cookie('access_token_cookie',access_token,httponly=True)
+    access_token = create_access_token(identity=str(user.user_id))
 
     response=redirect("/")
+
+    response.set_cookie('access_token_cookie',access_token,httponly=True)
     return response

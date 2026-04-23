@@ -6,10 +6,13 @@ from app.blueprints.volunteer import bp as volunteer_bp
 from app.blueprints.donate import bp as donate_bp
 from app.blueprints.contact import bp as contact_bp
 from app.blueprints.explore import bp as explore_bp
+from app.blueprints.auth_check import bp as auth_check_bp
 from app.models.user import User
 
 from app.extensions import db 
 from app.extensions import jwt
+
+from datetime import timedelta
 
 def create_app():
     app = Flask(__name__)
@@ -21,8 +24,15 @@ def create_app():
     app.register_blueprint(donate_bp)
     app.register_blueprint(contact_bp)
     app.register_blueprint(explore_bp)
+    app.register_blueprint(auth_check_bp)
 
     app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
+
+    app.config['JWT_TOKEN_LOCATION'] = ['cookies']
+    app.config['JWT_COOKIE_CSRF_PROTECT'] = False
+    app.config["JWT_COOKIE_SECURE"] = False 
+    app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(seconds=12)
+    app.config["JWT_SECRET_KEY"] = os.getenv('JWT_SECRET_KEY')
 
     db.init_app(app)
     jwt.init_app(app)
