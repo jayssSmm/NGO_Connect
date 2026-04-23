@@ -1,10 +1,3 @@
-make registration page named "register.html"
-and login named "login.html" in templates
-
-
-
-
-
 
 No real acceptance/rejection from NGOs; just simulated messages.BACKEND NEEDS
 Authentication & User Management
