@@ -75,26 +75,5 @@
     <footer>
         <p>&copy; 2024 NGO Connect. All rights reserved.</p>
     </footer>
-    <script>
-        function toggleMenu() {
-            const menu = document.getElementById('menu');
-            menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
-        }
-
-        function showSection(sectionId) {
-            document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
-            document.getElementById(sectionId).classList.add('active');
-        }
-
-        function logout() {
-            // Clear session storage
-            sessionStorage.removeItem('userSession');
-            sessionStorage.removeItem('userType');
-            sessionStorage.removeItem('notifications');
-            
-            alert('Logged out successfully!');
-            window.location.href = '/';
-        }
-    </script>
 </body>
 </html>

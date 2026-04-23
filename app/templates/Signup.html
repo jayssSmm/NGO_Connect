@@ -22,36 +22,5 @@
             <p>Already have an account? <a href="/login">Login</a></p>
         </div>
     </div>
-    <script>
-        document.getElementById('signupForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const fullName = document.getElementById('fullName').value;
-            const email = document.getElementById('email').value;
-            
-            // Store user session
-            sessionStorage.setItem('userSession', JSON.stringify({
-                name: fullName,
-                email: email,
-                loggedIn: true,
-                timestamp: new Date().getTime()
-            }));
-            sessionStorage.setItem('userType', 'registered');
-            
-            alert('Account created successfully!');
-            window.location.href = 'Dashboard.html';
-        });
-
-        function signInWithGoogle() {
-            // Simulate Google sign in
-            sessionStorage.setItem('userSession', JSON.stringify({
-                email: 'user@gmail.com',
-                loggedIn: true,
-                timestamp: new Date().getTime()
-            }));
-            sessionStorage.setItem('userType', 'registered');
-            alert('Signed in with Google!');
-            window.location.href = 'Dashboard.html';
-        }
-    </script>
 </body>
 </html>
