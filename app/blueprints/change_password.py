@@ -91,7 +91,7 @@ def change_password():
 
     # Hash new password and update DB
     hashed = generate_password_hash(password)
-    user.password = hashed
+    user.password_hash = hashed
     db.session.commit()
 
     # Clean up verification token
