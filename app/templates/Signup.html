@@ -10,17 +10,125 @@
 <body class="page-centered">
     <div class="signup-form">
         <h2>Sign Up</h2>
-        <form id="signupForm" action="/register" method="post">
+
+        <!-- registration details -->
+        <form id="registerForm">
             <input type="text" id="fullName" placeholder="Full Name" required>
             <input type="email" id="email" name="email" placeholder="Email" required>
-            <input type="password" id="password" name='password' placeholder="Create Password" required>
-            <button type="submit">Sign Up</button>
+            <input type="password" id="password" name="password" placeholder="Create Password" required>
+            <p id="registerError" style="color:red; display:none;"></p>
+            <button type="button" id="generateOTPBtn">Generate OTP</button>
         </form>
+
+        <!-- OTP verification -->
+        <form id="otpForm" style="display:none;">
+            <input type="hidden" id="hiddenEmail" name="email">
+            <p style="font-size:0.9rem; color:#555; margin-bottom:0.75rem;">
+                OTP sent to <strong id="sentToEmail"></strong>. Valid for 10 minutes.
+            </p>
+            <input type="text" id="otpInput" name="otp" placeholder="Enter 6-digit OTP" maxlength="6" required>
+            <p id="otpError" style="color:red; display:none;"></p>
+            <button type="submit">Verify & Sign Up</button>
+            <button type="button" id="resendOTPBtn" style="margin-top:0.5rem; background:none; border:none; color:#2563eb; cursor:pointer; font-size:0.9rem;">
+                Resend OTP
+            </button>
+        </form>
+
         <div class="or">---------------------OR----------------------</div>
         <button class="google-btn" onclick="signInWithGoogle()">Sign in with Google</button>
+
         <div class="login-link">
             <p>Already have an account? <a href="/login">Login</a></p>
         </div>
     </div>
+
+    <script>
+        async function generateOTP() {
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const errorEl = document.getElementById('registerError');
+
+            if (!email || !password) {
+                errorEl.textContent = 'Please fill in all fields.';
+                errorEl.style.display = 'block';
+                return;
+            }
+
+            const res = await fetch('/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({ email, password })
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                errorEl.style.display = 'none';
+                document.getElementById('registerForm').style.display = 'none';
+                document.getElementById('otpForm').style.display = 'block';
+                document.getElementById('hiddenEmail').value = email;
+                document.getElementById('sentToEmail').textContent = email;
+            } else {
+                errorEl.textContent = data.error || 'Something went wrong.';
+                errorEl.style.display = 'block';
+            }
+        }
+
+        async function resendOTP() {
+            const email = document.getElementById('hiddenEmail').value;
+            const password = document.getElementById('password').value || '';
+            const otpError = document.getElementById('otpError');
+
+            const res = await fetch('/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({ email, password })
+            });
+
+            if (res.ok) {
+                otpError.textContent = 'OTP resent. Please check your email.';
+                otpError.style.color = 'green';
+            } else {
+                const data = await res.json();
+                otpError.textContent = data.error || 'Failed to resend OTP.';
+                otpError.style.color = 'red';
+            }
+            otpError.style.display = 'block';
+        }
+
+        document.getElementById('otpForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const email = document.getElementById('hiddenEmail').value;
+            const otp = document.getElementById('otpInput').value.trim();
+            const errorEl = document.getElementById('otpError');
+
+            const res = await fetch('/verify-otp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({ email, otp })
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                window.location.href = '/';
+            } else if (res.status === 410) {
+                errorEl.textContent = data.error;
+                errorEl.style.color = 'red';
+                errorEl.style.display = 'block';
+                setTimeout(() => {
+                    document.getElementById('otpForm').style.display = 'none';
+                    document.getElementById('registerForm').style.display = 'block';
+                }, 2000);
+            } else {
+                errorEl.textContent = data.error;
+                errorEl.style.color = 'red';
+                errorEl.style.display = 'block';
+            }
+        });
+
+        document.getElementById('generateOTPBtn').addEventListener('click', generateOTP);
+        document.getElementById('resendOTPBtn').addEventListener('click', resendOTP);
+    </script>
 </body>
 </html>

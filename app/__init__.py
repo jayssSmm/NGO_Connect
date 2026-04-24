@@ -15,6 +15,9 @@ from app.extensions import db
 from app.extensions import jwt
 
 from datetime import timedelta
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def create_app():
     app = Flask(__name__)
