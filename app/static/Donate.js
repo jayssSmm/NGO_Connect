@@ -61,13 +61,13 @@
 
     function showRazorpayScanner(ngo, amount) {
         const scannerCode = `
-RAZORPAY_QR_CODE_${ngo.scannerId}
-Amount: ${amount} INR
-NGO: ${ngo.name}
-Scan this code with any UPI app to proceed with payment.
+            RAZORPAY_QR_CODE_${ngo.scannerId}
+            Amount: ${amount} INR
+            NGO: ${ngo.name}
+            Scan this code with any UPI app to proceed with payment.
 
-Dummy QR: [QR_${ngo.scannerId}_${Date.now()}]
-        `;
+            Dummy QR: [QR_${ngo.scannerId}_${Date.now()}]
+            `;
         alert('Razorpay Dummy Scanner for ' + ngo.name + ':\n\n' + scannerCode + '\n\nAfter scanning and payment, you will receive confirmation.');
         setTimeout(() => processMoneyDonation(ngo, amount), 500);
     }
