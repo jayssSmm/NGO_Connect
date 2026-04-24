@@ -9,6 +9,7 @@ from app.blueprints.explore import bp as explore_bp
 from app.blueprints.auth_check import bp as auth_check_bp
 from app.blueprints.dashboard import bp as  dashboard_bp
 from app.blueprints.logout import bp as logout_bp
+from app.blueprints.change_password import bp as change_pass_bp
 from app.models.user import User
 
 from app.extensions import db 
@@ -32,6 +33,7 @@ def create_app():
     app.register_blueprint(auth_check_bp)
     app.register_blueprint(logout_bp)
     app.register_blueprint(dashboard_bp)
+    app.register_blueprint(change_pass_bp)
 
     app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
 

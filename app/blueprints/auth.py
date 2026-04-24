@@ -98,6 +98,9 @@ def login():
     ).scalar_one_or_none()
 
     if not user or not check_password_hash(user.password_hash, password):
+        print(user.password_hash)
+        print()
+        print(create_access_token(password))
         return redirect("/login")
 
     access_token = create_access_token(identity=str(user.user_id))
