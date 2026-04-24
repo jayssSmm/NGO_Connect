@@ -93,7 +93,7 @@
                 <div class="hamburger" onclick="toggleUserMenu()">☰ My Account</div>
                 <div class="user-menu" id="userMenu" style="display:none;">
                     <a href="/dashboard">Dashboard</a>
-                    <a href="/logout">Logout</a>
+                    <a href="#" onclick="logout()">Logout</a>
                 </div>
             `;
         }
@@ -105,6 +105,14 @@
             menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
         }
     }
+
+    async function logout() {
+    await fetch('/logout', {
+        method: 'POST',
+        credentials: 'same-origin'
+    });
+    window.location.href = '/';
+}
 
     window.onload = function() {
         displayNGOs(ngos);

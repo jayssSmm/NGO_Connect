@@ -41,6 +41,14 @@
         document.getElementById('donationSection').style.display = 'block';
     }
 
+    async function logout() {
+        await fetch('/logout', {
+            method: 'POST',
+            credentials: 'same-origin'
+        });
+        window.location.href = '/';
+    }
+
     async function donateMoney() {
 
         const amount = document.getElementById('amount').value;
@@ -118,7 +126,7 @@ Dummy QR: [QR_${ngo.scannerId}_${Date.now()}]
                 <div class="hamburger" onclick="toggleUserMenu()">☰ My Account</div>
                 <div class="user-menu" id="userMenu" style="display:none;">
                     <a href="/dashboard">Dashboard</a>
-                    <a href="/logout">Logout</a>
+                    <a href="#" onclick="logout()">Logout</a>
                 </div>
             `;
         }
