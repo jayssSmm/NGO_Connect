@@ -54,5 +54,43 @@
     <footer class="flex-all-center">
          <p>Help as much as you can &#x1F60A;</p>
     </footer>
+    <script>
+        async function updateHeaderOnLoad() {
+            try {
+                const res = await fetch('/api/auth/check', { credentials: 'same-origin' });
+                const authButtons = document.querySelector('.auth-buttons');
+                if (!authButtons) return;
+
+                if (res.ok) {
+                    authButtons.innerHTML = `
+                        <div class="hamburger" onclick="toggleUserMenu()">☰ My Account</div>
+                        <div class="user-menu" id="userMenu" style="display:none;">
+                            <a href="/dashboard">Dashboard</a>
+                            <a href="#" onclick="logout()">Logout</a>
+                        </div>
+                    `;
+                }
+            } catch {
+                // not logged in, keep default login/signup buttons
+            }
+        }
+
+        function toggleUserMenu() {
+            const menu = document.getElementById('userMenu');
+            if (menu) {
+                menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+            }
+        }
+
+        async function logout() {
+            await fetch('/logout', {
+                method: 'POST',
+                credentials: 'same-origin'
+            });
+            window.location.href = '/';
+        }
+
+        window.addEventListener('load', updateHeaderOnLoad);
+    </script>
 </body>
 </html>

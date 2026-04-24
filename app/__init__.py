@@ -7,6 +7,7 @@ from app.blueprints.donate import bp as donate_bp
 from app.blueprints.contact import bp as contact_bp
 from app.blueprints.explore import bp as explore_bp
 from app.blueprints.auth_check import bp as auth_check_bp
+from app.blueprints.logout import bp as logout_bp
 from app.models.user import User
 
 from app.extensions import db 
@@ -25,6 +26,7 @@ def create_app():
     app.register_blueprint(contact_bp)
     app.register_blueprint(explore_bp)
     app.register_blueprint(auth_check_bp)
+    app.register_blueprint(logout_bp)
 
     app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
 
