@@ -6,6 +6,20 @@
     <title>Sign Up</title>
     <link rel="stylesheet" href="../static/styles.css">
     <link rel="stylesheet" href="../static/utility.css">
+    <style>
+        .spinner {
+            display: inline-block;
+            width: 13px;
+            height: 13px;
+            border: 2px solid currentColor;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            vertical-align: middle;
+            margin-right: 4px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
 </head>
 <body class="page-centered">
     <div class="signup-form">
@@ -28,7 +42,7 @@
             </p>
             <input type="text" id="otpInput" name="otp" placeholder="Enter 6-digit OTP" maxlength="6" required>
             <p id="otpError" style="color:red; display:none;"></p>
-            <button type="submit">Verify & Sign Up</button>
+            <button type="submit" id="verifySignupOtpBtn">Verify & Sign Up</button>
             <button type="button" id="resendOTPBtn" style="margin-top:0.5rem; background:none; border:none; color:#2563eb; cursor:pointer; font-size:0.9rem;">
                 Resend OTP
             </button>
@@ -44,6 +58,7 @@
 
     <script>
         async function generateOTP() {
+            const btn = document.getElementById('generateOTPBtn');
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
             const errorEl = document.getElementById('registerError');
@@ -54,23 +69,35 @@
                 return;
             }
 
-            const res = await fetch('/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: new URLSearchParams({ email, password })
-            });
+            btn.disabled = true;
+            btn.innerHTML = `<span class="spinner"></span> Sending...`;
 
-            const data = await res.json();
+            try {
+                const res = await fetch('/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ email, password })
+                });
 
-            if (res.ok) {
-                errorEl.style.display = 'none';
-                document.getElementById('registerForm').style.display = 'none';
-                document.getElementById('otpForm').style.display = 'block';
-                document.getElementById('hiddenEmail').value = email;
-                document.getElementById('sentToEmail').textContent = email;
-            } else {
-                errorEl.textContent = data.error || 'Something went wrong.';
+                const data = await res.json();
+
+                if (res.ok) {
+                    errorEl.style.display = 'none';
+                    document.getElementById('registerForm').style.display = 'none';
+                    document.getElementById('otpForm').style.display = 'block';
+                    document.getElementById('hiddenEmail').value = email;
+                    document.getElementById('sentToEmail').textContent = email;
+                } else {
+                    errorEl.textContent = data.error || 'Something went wrong.';
+                    errorEl.style.display = 'block';
+                }
+
+            } catch {
+                errorEl.textContent = 'Network error.';
                 errorEl.style.display = 'block';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = "Generate OTP";
             }
         }
 
