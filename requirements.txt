@@ -2,4 +2,11 @@ flask
 flask_jwt_extended
 dotenv
 redis
+<<<<<<< Updated upstream
 flask_sqlalchemy
+=======
+flask_sqlalchemy
+psycopg2
+flask-cors
+gunicorn
+>>>>>>> Stashed changes
