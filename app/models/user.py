@@ -7,5 +7,6 @@ class User(db.Model):
 
     user_id = db.Column(UUID(as_uuid=True), primary_key=True, server_default=db.text("gen_random_uuid()"))
     email = db.Column(db.String(100), unique=True, nullable=False)
+    full_name = db.Column(db.String(120), nullable=True)
     password_hash = db.Column(db.String(255), nullable=False)
     created_at = db.Column(db.DateTime(timezone=True), server_default=func.now())

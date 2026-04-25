@@ -1,11 +1,11 @@
-
     let currentNGO = null;
 
-    const ngos = [
-        { name: 'Green Earth NGO', location: 'Kolkata' },
-        { name: 'Helping Hands', location: 'Delhi' },
-        { name: 'Child Care Foundation', location: 'Mumbai' },
-    ];
+    async function fetchNGOs(query = '') {
+        const url = '/api/ngos' + (query ? `?q=${encodeURIComponent(query)}` : '');
+        const res = await fetch(url, { credentials: 'same-origin' });
+        const payload = await res.json();
+        return res.ok ? payload : [];
+    }
 
     async function checkAuth() {
         try {
@@ -16,20 +16,35 @@
         }
     }
 
-    function searchNGOs() {
-        const query = document.getElementById('searchInput').value.toLowerCase();
-        const filtered = ngos.filter(ngo => ngo.name.toLowerCase().includes(query));
-        document.getElementById('volunteerSection').style.display = 'none';
-        displayNGOs(filtered);
+    async function searchNGOs() {
+        const query = document.getElementById('searchInput').value.trim();
+        clearVolunteerMessage();
+        currentNGO = null;
+        updateSelection();
+        const ngos = await fetchNGOs(query);
+        displayNGOs(ngos, query);
     }
 
-    function displayNGOs(ngos) {
+    function displayNGOs(ngos, query = '') {
         const list = document.getElementById('ngoList');
         list.innerHTML = '';
+
+        if (!ngos.length) {
+            const item = document.createElement('div');
+            item.className = 'no-results';
+            item.textContent = query ? 'Sorry, We could not find this NGO' : 'No NGOs available at the moment.';
+            list.appendChild(item);
+            return;
+        }
+
         ngos.forEach(ngo => {
             const item = document.createElement('div');
-            item.className = 'ngo-item';
-            item.innerHTML = `<h4>${ngo.name}</h4><p>Location: ${ngo.location}</p>`;
+            item.className = 'ngo-card';
+            item.innerHTML = `
+                <h4>${ngo.name}</h4>
+                <p>${ngo.location}</p>
+                <p>${ngo.focus}</p>
+            `;
             item.onclick = () => selectNGO(ngo);
             list.appendChild(item);
         });
@@ -37,16 +52,26 @@
 
     function selectNGO(ngo) {
         currentNGO = ngo;
-        document.getElementById('ngoName').textContent = ngo.name;
-        document.getElementById('volunteerSection').style.display = 'block';
+        document.getElementById('selectedNgoName').textContent = ngo.name;
+        document.getElementById('selectedNgoDetails').textContent = 'These are the skills this NGO is seeking:';
+        document.getElementById('skillsNeeded').textContent = ngo.focus;
+        document.getElementById('skillsInput').value = '';
+        clearVolunteerMessage();
     }
 
-    async function applyVolunteerBox() {
-        const authenticated = await checkAuth();
-        if (!authenticated) {
-            showModal();
+    function updateSelection() {
+        const selectedName = document.getElementById('selectedNgoName');
+        const selectedDetails = document.getElementById('selectedNgoDetails');
+        const skillsNeeded = document.getElementById('skillsNeeded');
+        if (!currentNGO) {
+            selectedName.textContent = 'Select an NGO to view skill needs';
+            selectedDetails.textContent = 'Click any NGO above to see what skills it is looking for.';
+            skillsNeeded.textContent = '';
             return;
         }
+        selectedName.textContent = currentNGO.name;
+        selectedDetails.textContent = 'These are the skills this NGO is seeking:';
+        skillsNeeded.textContent = currentNGO.focus;
     }
 
     async function applyVolunteer() {
@@ -55,33 +80,41 @@
             showModal();
             return;
         }
-
-        const skills = document.getElementById('skills').value;
-        if (skills.trim()) {
-            alert('Application sent to ' + currentNGO.name + '. You will be notified of acceptance/rejection on your dashboard and email.');
-        } else {
-            alert('Please enlist your skills.');
-        }
-    }
-
-    // donate box click guard
-    async function handleDonateClick(e) {
-        e.preventDefault();
-        const authenticated = await checkAuth();
-        if (!authenticated) {
-            showModal();
+        if (!currentNGO) {
+            setVolunteerMessage('Please select an NGO first.', true);
             return;
         }
-        window.location.href = '/donate';
+        const skills = document.getElementById('skillsInput').value.trim();
+        if (!skills) {
+            setVolunteerMessage('Please add your skills before applying.', true);
+            return;
+        }
+        setVolunteerMessage(`Application sent to ${currentNGO.name}. You will be notified about the next steps.`, false);
+        document.getElementById('skillsInput').value = '';
+    }
+
+    function setVolunteerMessage(message, error = false) {
+        const msg = document.getElementById('volunteerMessage');
+        msg.textContent = message;
+        msg.style.color = error ? '#e53e3e' : '#166534';
+    }
+
+    function clearVolunteerMessage() {
+        setVolunteerMessage('');
     }
 
     function showModal() {
         const m = document.getElementById('auth-modal');
-        m.style.display = 'flex';
+        if (m) {
+            m.style.display = 'flex';
+        }
     }
 
     function closeModal() {
-        document.getElementById('auth-modal').style.display = 'none';
+        const m = document.getElementById('auth-modal');
+        if (m) {
+            m.style.display = 'none';
+        }
     }
 
     async function updateHeaderOnLoad() {
@@ -107,23 +140,19 @@
     }
 
     async function logout() {
-    await fetch('/logout', {
-        method: 'POST',
-        credentials: 'same-origin'
-    });
-    window.location.href = '/';
-}
+        await fetch('/logout', {
+            method: 'POST',
+            credentials: 'same-origin'
+        });
+        window.location.href = '/';
+    }
 
-    window.onload = function() {
+    window.onload = async function() {
+        const ngos = await fetchNGOs();
         displayNGOs(ngos);
         updateHeaderOnLoad();
+        updateSelection();
 
-        // attach donate guard to any element with class="donate"
-        document.querySelectorAll('.donate').forEach(el => {
-            el.addEventListener('click', handleDonateClick);
-        });
-
-        // close modal on backdrop click
         const modal = document.getElementById('auth-modal');
         if (modal) {
             modal.addEventListener('click', function(e) {

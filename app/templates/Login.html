@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -7,144 +7,70 @@
     <link rel="stylesheet" href="../static/styles.css">
     <link rel="stylesheet" href="../static/utility.css">
     <style>
-        /* Only two rules that have no equivalent in your stylesheets */
-        .error-text { color: #e53e3e; font-size: 0.82rem; margin: -10px 0 10px 0; display: none; }
-        .info-text  { color: #2d6a4f; font-size: 0.82rem; margin: -10px 0 10px 0; display: none; }
-        .spinner {
-            display: inline-block; width: 13px; height: 13px;
-            border: 2px solid currentColor; border-top-color: transparent;
-            border-radius: 50%; animation: spin 0.6s linear infinite;
-            vertical-align: middle; margin-right: 4px;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        #otpSection { display: none; }
+        .error-text { color: #e53e3e; margin: 0 0 16px; display: none; font-size: 0.95rem; }
+        .info-text { color: #166534; margin: 0 0 16px; display: none; font-size: 0.95rem; }
     </style>
 </head>
 <body class="page-centered">
     <div class="login-form">
         <h2>Login</h2>
-
-        <form id="loginForm" action="/login" method="post">
+        <p id="errorMessage" class="error-text"></p>
+        <form id="loginForm">
+            <input type="hidden" id="nextUrl" name="next" value="{{ next_url }}">
             <input type="email" id="email" name="email" placeholder="Email" required>
             <input type="password" id="password" name="password" placeholder="Password" required>
-
-            <div class="forgot-password">
-                <button type="button" id="forgotPasswordBtn"
-                    style="width:auto; padding:4px 0; background:none; color:#4CAF50;
-                           box-shadow:none; margin:0; font-size:0.9rem;">
-                    Forgot Password?
-                </button>
-            </div>
-
-            <p id="fpEmailError" class="error-text">Please enter your email address first.</p>
-            <p id="fpInfo"       class="info-text"></p>
-
-            <div id="otpSection" class="otp-section">
-                <input type="text" id="otpInput" placeholder="Enter OTP"
-                       maxlength="6" inputmode="numeric" autocomplete="one-time-code"
-                       style="letter-spacing:0.25em; text-align:center;">
-                <p id="otpError" class="error-text"></p>
-                <button type="button" id="verifyOtpBtn">Verify OTP</button>
-            </div>
-
             <button type="submit">Login</button>
         </form>
-
-        <div class="or">-----------------OR--------------------------</div>
-        <button class="google-btn" onclick="continueWithGoogle()">Continue with Google</button>
-
+        <p id="infoMessage" class="info-text"></p>
         <div class="signup-link">
             <p>Don't have an account? <a href="/register">Sign Up</a></p>
         </div>
     </div>
 
     <script>
-        const emailInput   = document.getElementById("email");
-        const forgotBtn    = document.getElementById("forgotPasswordBtn");
-        const fpEmailError = document.getElementById("fpEmailError");
-        const fpInfo       = document.getElementById("fpInfo");
-        const otpSection   = document.getElementById("otpSection");
-        const otpInput     = document.getElementById("otpInput");
-        const otpError     = document.getElementById("otpError");
-        const verifyOtpBtn = document.getElementById("verifyOtpBtn");
+        const loginForm = document.getElementById('loginForm');
+        const errorMessage = document.getElementById('errorMessage');
+        const infoMessage = document.getElementById('infoMessage');
+        let loginAttempts = 0;
 
-        let pendingEmail = "";
+        loginForm.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            errorMessage.style.display = 'none';
+            infoMessage.style.display = 'none';
 
-        function show(el) { el.style.display = "block"; }
-        function hide(el) { el.style.display = "none";  }
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const nextUrl = document.getElementById('nextUrl').value || '/';
 
-        forgotBtn.addEventListener("click", async () => {
-            const email = emailInput.value.trim();
-            hide(fpEmailError); hide(fpInfo); hide(otpSection); hide(otpError);
-
-            if (!email) { show(fpEmailError); emailInput.focus(); return; }
-
-            forgotBtn.disabled = true;
-            forgotBtn.innerHTML = `<span class="spinner"></span> Sending…`;
+            if (!email || !password) {
+                errorMessage.textContent = 'Please enter both email and password.';
+                errorMessage.style.display = 'block';
+                return;
+            }
 
             try {
-                const res  = await fetch("/auth/forgot-password", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ email })
+                const res = await fetch('/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password, next: nextUrl })
                 });
                 const data = await res.json();
-
-                fpInfo.style.color = res.ok ? "#2d6a4f" : "#e53e3e";
-                fpInfo.textContent = res.ok ? data.message : (data.error || "Something went wrong.");
-                show(fpInfo);
 
                 if (res.ok) {
-                    pendingEmail = email;
-                    show(otpSection);
-                    otpInput.focus();
-                }
-            } catch {
-                fpInfo.style.color = "#e53e3e";
-                fpInfo.textContent = "Network error. Please check your connection.";
-                show(fpInfo);
-            } finally {
-                forgotBtn.disabled = false;
-                forgotBtn.textContent = "Forgot Password?";
-            }
-        });
-
-        verifyOtpBtn.addEventListener("click", async () => {
-            const otp = otpInput.value.trim();
-            hide(otpError);
-
-            if (!otp) { otpError.textContent = "Please enter the OTP."; show(otpError); otpInput.focus(); return; }
-
-            verifyOtpBtn.disabled = true;
-            verifyOtpBtn.innerHTML = `<span class="spinner"></span> Verifying…`;
-
-            try {
-                const res  = await fetch("/auth/verify-otp", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ email: pendingEmail, otp })
-                });
-                const data = await res.json();
-
-                if (!res.ok) {
-                    otpError.textContent = data.error || "OTP verification failed.";
-                    show(otpError);
-                    otpInput.value = "";
-                    otpInput.focus();
+                    window.location.href = data.redirect || '/';
                 } else {
-                    sessionStorage.setItem("fp_email", pendingEmail);
-                    window.location.href = data.redirect;
+                    loginAttempts += 1;
+                    errorMessage.textContent = data.error || 'Wrong credentials. Try again.';
+                    errorMessage.style.display = 'block';
+                    if (loginAttempts >= 3) {
+                        alert('Sign Up before Login');
+                    }
                 }
-            } catch {
-                otpError.textContent = "Network error. Please try again.";
-                show(otpError);
-            } finally {
-                verifyOtpBtn.disabled = false;
-                verifyOtpBtn.textContent = "Verify OTP";
+            } catch (err) {
+                errorMessage.textContent = 'Unable to log in right now. Please try again later.';
+                errorMessage.style.display = 'block';
             }
         });
-
-        otpInput.addEventListener("keydown", e => { if (e.key === "Enter") verifyOtpBtn.click(); });
     </script>
 </body>
 </html>

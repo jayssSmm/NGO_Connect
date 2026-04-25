@@ -1,9 +1,10 @@
-
-    const ngos = [
-        { name: 'Green Earth NGO', location: 'Kolkata', lat: 22.5726, lng: 88.3639 },
-        { name: 'Helping Hands', location: 'Delhi', lat: 28.7041, lng: 77.1025 },
-        { name: 'Child Care Foundation', location: 'Mumbai', lat: 19.0760, lng: 72.8777 },
-    ];
+    async function fetchNGOs(query = '') {
+        const url = '/api/ngos' + (query ? `?q=${encodeURIComponent(query)}` : '');
+        const res = await fetch(url, { credentials: 'same-origin' });
+        const payload = await res.json();
+        if (res.ok) return payload;
+        return Array.isArray(payload.ngos) ? payload.ngos : [];
+    }
 
     async function checkAuth() {
         try {
@@ -14,13 +15,32 @@
         }
     }
 
-    function searchNGOs() {
-        const query = document.getElementById('searchInput').value.toLowerCase();
-        const filtered = ngos.filter(ngo =>
-            ngo.name.toLowerCase().includes(query) ||
-            ngo.location.toLowerCase().includes(query)
-        );
-        displayNGOs(filtered);
+    function setLocationMessage(text, error = true) {
+        const message = document.getElementById('locationMessage');
+        if (!message) return;
+        message.textContent = text || '';
+        message.style.color = error ? '#e53e3e' : '#166534';
+    }
+
+    function clearLocationMessage() {
+        setLocationMessage('');
+    }
+
+    async function searchNGOs() {
+        const query = document.getElementById('searchInput').value.trim();
+        clearLocationMessage();
+        const ngos = await fetchNGOs(query);
+
+        if (!ngos.length && query) {
+            setLocationMessage("Sorry, we can't find this NGO", true);
+        }
+
+        displayNGOs(ngos, query);
+    }
+
+    function isValidCoords(raw) {
+        const coords = raw.split(',').map(c => parseFloat(c.trim()));
+        return coords.length === 2 && !isNaN(coords[0]) && !isNaN(coords[1]);
     }
 
     function getLocation() {
@@ -29,34 +49,43 @@
                 const lat = position.coords.latitude;
                 const lng = position.coords.longitude;
                 const coords = `${lat}, ${lng}`;
-                navigator.clipboard.writeText(coords).then(() => {
-                    alert('Coordinates copied to clipboard: ' + coords);
-                    document.getElementById('coordsInput').value = coords;
-                });
+                document.getElementById('coordsInput').value = coords;
+                setLocationMessage('Coordinates captured. Click Find NGOs Near Me.', false);
+            }, function() {
+                setLocationMessage('Unable to detect your location. Please enter coordinates.', true);
             });
         } else {
-            alert('Geolocation is not supported by this browser.');
+            setLocationMessage('Geolocation is not supported by this browser.', true);
         }
     }
 
-    function findNearbyNGOs() {
-        const coords = document.getElementById('coordsInput').value.split(',').map(c => parseFloat(c.trim()));
-        if (coords.length !== 2 || isNaN(coords[0]) || isNaN(coords[1])) {
-            alert('Please enter valid coordinates.');
+    async function findNearbyNGOs() {
+        const raw = document.getElementById('coordsInput').value.trim();
+        if (!isValidCoords(raw)) {
+            setLocationMessage('Enter Correct Coordinate', true);
             return;
         }
-        const [userLat, userLng] = coords;
-        const nearby = ngos.filter(ngo => getDistance(userLat, userLng, ngo.lat, ngo.lng) <= 5);
-        displayNGOs(nearby);
+
+        const [userLat, userLng] = raw.split(',').map(c => parseFloat(c.trim()));
+        const ngos = await fetchNGOs();
+        const nearby = ngos.filter(ngo => ngo.latitude && ngo.longitude && getDistance(userLat, userLng, ngo.latitude, ngo.longitude) <= 5);
+
+        if (!nearby.length) {
+            setLocationMessage('No nearby NGOs were found for those coordinates.', true);
+        } else {
+            setLocationMessage('Showing NGOs near your location.', false);
+        }
+
+        displayNGOs(nearby, '');
     }
 
     function getDistance(lat1, lng1, lat2, lng2) {
         const R = 6371;
         const dLat = deg2rad(lat2 - lat1);
         const dLng = deg2rad(lng2 - lng1);
-        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
                   Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
-                  Math.sin(dLng/2) * Math.sin(dLng/2);
+                  Math.sin(dLng / 2) * Math.sin(dLng / 2);
         return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     }
 
@@ -64,13 +93,28 @@
         return deg * (Math.PI / 180);
     }
 
-    function displayNGOs(ngos) {
+    function displayNGOs(ngos, query = '') {
         const list = document.getElementById('ngoList');
         list.innerHTML = '';
+
+        if (!ngos.length) {
+            const item = document.createElement('div');
+            item.className = 'no-results';
+            item.textContent = query ? "Sorry, we can't find this NGO" : 'No NGOs available at the moment.';
+            list.appendChild(item);
+            return;
+        }
+
         ngos.forEach(ngo => {
             const item = document.createElement('div');
             item.className = 'ngo-item';
-            item.innerHTML = `<h4>${ngo.name}</h4><p>Location: ${ngo.location}</p>`;
+            item.innerHTML = `
+                <a class="ngo-link" href="/ngo/${encodeURIComponent(ngo.ngo_id)}">
+                    <h4>${ngo.name}</h4>
+                </a>
+                <p>Location: ${ngo.location}</p>
+                <p>${ngo.focus}</p>
+            `;
             list.appendChild(item);
         });
     }
@@ -106,7 +150,8 @@
         window.location.href = '/';
     }
 
-    window.onload = function() {
+    window.onload = async function() {
+        const ngos = await fetchNGOs();
         displayNGOs(ngos);
         updateHeaderOnLoad();
     };

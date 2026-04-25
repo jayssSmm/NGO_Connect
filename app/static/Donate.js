@@ -1,11 +1,11 @@
-
     let currentNGO = null;
 
-    const ngos = [
-        { name: 'Green Earth NGO', location: 'Kolkata', scannerId: 'GE001' },
-        { name: 'Helping Hands', location: 'Delhi', scannerId: 'HH002' },
-        { name: 'Child Care Foundation', location: 'Mumbai', scannerId: 'CCF003' },
-    ];
+    async function fetchNGOs(query = '') {
+        const url = '/api/ngos' + (query ? `?q=${encodeURIComponent(query)}` : '');
+        const res = await fetch(url, { credentials: 'same-origin' });
+        const payload = await res.json();
+        return res.ok ? payload : [];
+    }
 
     async function checkAuth() {
         try {
@@ -16,20 +16,33 @@
         }
     }
 
-    function searchNGOs() {
-        const query = document.getElementById('searchInput').value.toLowerCase();
-        const filtered = ngos.filter(ngo => ngo.name.toLowerCase().includes(query));
-        document.getElementById('donationSection').style.display = 'none'
-        displayNGOs(filtered);
+    async function searchNGOs() {
+        const query = document.getElementById('searchInput').value.trim();
+        document.getElementById('donationSection').style.display = 'none';
+        const ngos = await fetchNGOs(query);
+        displayNGOs(ngos, query);
     }
 
-    function displayNGOs(ngos) {
+    function displayNGOs(ngos, query = '') {
         const list = document.getElementById('ngoList');
         list.innerHTML = '';
+
+        if (!ngos.length) {
+            const item = document.createElement('div');
+            item.className = 'no-results';
+            item.textContent = query ? 'Sorry, We could not find this NGO' : 'No NGOs available at the moment.';
+            list.appendChild(item);
+            return;
+        }
+
         ngos.forEach(ngo => {
             const item = document.createElement('div');
             item.className = 'ngo-item';
-            item.innerHTML = `<h4>${ngo.name}</h4><p>Location: ${ngo.location}</p>`;
+            item.innerHTML = `
+                <h4>${ngo.name}</h4>
+                <p>Location: ${ngo.location}</p>
+                <p>${ngo.focus}</p>
+            `;
             item.onclick = () => selectNGO(ngo);
             list.appendChild(item);
         });
@@ -50,6 +63,10 @@
     }
 
     async function donateMoney() {
+        if (!currentNGO) {
+            alert('Please select an NGO first.');
+            return;
+        }
 
         const amount = document.getElementById('amount').value;
         if (!amount || amount < 1) {
@@ -60,15 +77,8 @@
     }
 
     function showRazorpayScanner(ngo, amount) {
-        const scannerCode = `
-            RAZORPAY_QR_CODE_${ngo.scannerId}
-            Amount: ${amount} INR
-            NGO: ${ngo.name}
-            Scan this code with any UPI app to proceed with payment.
-
-            Dummy QR: [QR_${ngo.scannerId}_${Date.now()}]
-            `;
-        alert('Razorpay Dummy Scanner for ' + ngo.name + ':\n\n' + scannerCode + '\n\nAfter scanning and payment, you will receive confirmation.');
+        const scannerCode = `RAZORPAY_QR_CODE_${ngo.name.replace(/\s+/g, '_')}`;
+        alert('Razorpay Dummy Scanner for ' + ngo.name + ':\n\n' + scannerCode + '\nAmount: ' + amount + ' INR\n\nAfter scanning and payment, you will receive confirmation.');
         setTimeout(() => processMoneyDonation(ngo, amount), 500);
     }
 
@@ -78,16 +88,14 @@
 
         if (authenticated) {
             message += 'Confirmation received on both website and payment app.';
-            alert(message);
         } else {
             message += 'Confirmation received on payment app.';
-            alert(message);
         }
-
+        alert(message);
         document.getElementById('amount').value = '';
     }
 
-    async function donateItemsBox(){
+    async function donateItemsBox() {
         const authenticated = await checkAuth();
         if (!authenticated) {
             showModal();
@@ -99,6 +107,11 @@
         const authenticated = await checkAuth();
         if (!authenticated) {
             showModal();
+            return;
+        }
+
+        if (!currentNGO) {
+            alert('Please select an NGO first.');
             return;
         }
 
@@ -139,7 +152,8 @@
         }
     }
 
-    window.onload = function() {
+    window.onload = async function() {
+        const ngos = await fetchNGOs();
         displayNGOs(ngos);
         updateHeaderOnLoad();
 

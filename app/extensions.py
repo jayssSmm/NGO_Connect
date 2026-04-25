@@ -13,10 +13,26 @@ db = SQLAlchemy()
 database_url = os.getenv("DATABASE_URL")
 redis_url = os.getenv("REDIS_URL")
 
-redis_client = redis.Redis.from_url(
-    redis_url,
-    decode_responses=True
-)
+class RedisFallback:
+    def __init__(self):
+        self.store = {}
+
+    def setex(self, key, ttl, value):
+        self.store[key] = value
+
+    def get(self, key):
+        return self.store.get(key)
+
+    def delete(self, key):
+        self.store.pop(key, None)
+
+if redis_url:
+    redis_client = redis.Redis.from_url(
+        redis_url,
+        decode_responses=True
+    )
+else:
+    redis_client = RedisFallback()
 
 @jwt.invalid_token_loader
 def invalid_token_callback(error):
