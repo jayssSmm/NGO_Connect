@@ -2,39 +2,32 @@ from flask import Blueprint, request, jsonify
 from app.extensions import db
 from app.models.donation import Donation
 from app.models.user import User
+from flask_jwt_extended import get_jwt_identity,jwt_required
+from sqlalchemy import text
 import uuid
 
 donate_bp = Blueprint('donation', __name__)
 
-@donate_bp.route('/api/donate', methods=['POST'])
+@donate_bp.route("/api/donate", methods=["POST"])
+@jwt_required()
 def donate():
     data = request.get_json()
 
-    user_id = data.get('user_id')
-    ngo_id  = data.get('ngo_id')
-    amount  = data.get('amount')
-    item    = data.get('item')
+    user_id = get_jwt_identity()  # 🔥 THIS replaces currentUserId
+    ngo_id = data.get("ngo_id")
+    amount = data.get("amount")
 
-    if not user_id or not ngo_id:
-        return jsonify({'error': 'user_id and ngo_id are required'}), 400
+    if not ngo_id or not amount:
+        return jsonify({"error": "Missing data"}), 400
 
-    if not amount and not item:
-        return jsonify({'error': 'Either amount or item must be provided'}), 400
+    # store donation
+    db.session.execute(
+        text("""
+            INSERT INTO donations (user_id, ngo_id, amount)
+            VALUES (:user_id, :ngo_id, :amount)
+        """),
+        {"user_id": user_id, "ngo_id": ngo_id, "amount": amount}
+    )
+    db.session.commit()
 
-    if amount and item:
-        return jsonify({'error': 'Cannot donate both money and item at once'}), 400
-
-    try:
-        donation = Donation(
-            user_id=uuid.UUID(user_id),
-            ngo_id=uuid.UUID(ngo_id),
-            amount=amount if amount else None,
-            item=item if item else None,
-        )
-        db.session.add(donation)
-        db.session.commit()
-        return jsonify({'message': 'Donation recorded', 'donation_id': str(donation.donation_id)}), 201
-
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'error': str(e)}), 500
+    return jsonify({"ok": True}), 200
