@@ -45,42 +45,59 @@ def register():
     existing_user = db.session.execute(
         db.select(User).filter_by(email=email)
     ).scalar_one_or_none()
-
     if existing_user:
         return jsonify({"error": "This email is already registered."}), 409
 
+    otp,expire = generate_otp()  # make sure this returns a plain string/int
 
-    new_user = User(full_name=full_name, email=email, password_hash=generate_password_hash(password))
-    db.session.add(new_user)
-    db.session.commit()
+    pending = {
+        "full_name": full_name,
+        "email": email,
+        "password_hash": generate_password_hash(password),
+        "otp": otp,
+        "next": next_url
+    }
+    redis_client.setex(f"otp:{email}", OTP_TTL, json.dumps(pending))
 
-    access_token = create_access_token(identity=str(new_user.user_id))
-    response = jsonify({"ok": True, "redirect": next_url})
-    set_access_cookies(response, access_token)
-    return response, 200
+    send_email(
+        receiver_email=email,
+        receiver_name=full_name,
+        expire_time=OTP_TTL // 60,   # 600 seconds → 10 minutes
+        otp_code=otp
+    )
+
+    return jsonify({"ok": True}), 200
 
 @bp.route("/verify-otp", methods=['POST'])
 def verify_otp():
-    email = request.form.get('email', '').strip().lower()
-    entered_otp = request.form.get('otp', '').strip()
+    data = request.get_json() or request.form
+    email = data.get('email', '').strip().lower()
+    entered_otp = data.get('otp', '').strip()
 
     raw = redis_client.get(f"otp:{email}")
     if not raw:
         return jsonify({"error": "OTP expired. Please register again."}), 410
 
     pending = json.loads(raw)
+    print(pending)
+    print(type(pending.get('otp')))
 
-    if entered_otp != pending['otp']:
+    if str(entered_otp) != str(pending.get('otp')):
         return jsonify({"error": "Invalid OTP. Please try again."}), 400
 
-    new_user = User(email=pending['email'], password_hash=pending['password_hash'])
+    new_user = User(
+        full_name=pending['full_name'],
+        email=pending['email'],
+        password_hash=pending['password_hash']
+    )
     db.session.add(new_user)
     db.session.commit()
 
     redis_client.delete(f"otp:{email}")
 
+    next_url = pending.get('next', '/')
     access_token = create_access_token(identity=str(new_user.user_id))
-    response = jsonify({"ok": True})
+    response = jsonify({"ok": True, "redirect": next_url})
     set_access_cookies(response, access_token)
     return response, 200
 
