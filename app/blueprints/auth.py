@@ -18,12 +18,6 @@ bp = Blueprint("auth",__name__)
 
 OTP_TTL = 600
 
-def ensure_full_name_column():
-    try:
-        with db.engine.begin() as conn:
-            conn.execute(text("ALTER TABLE users ADD COLUMN full_name VARCHAR(120)"))
-    except Exception:
-        pass
 
 @bp.route("/register", methods=['GET', 'POST'])
 def register():
@@ -57,7 +51,6 @@ def register():
     if existing_user:
         return jsonify({"error": "This email is already registered."}), 409
 
-    ensure_full_name_column()
 
     new_user = User(full_name=full_name, email=email, password_hash=generate_password_hash(password))
     db.session.add(new_user)
