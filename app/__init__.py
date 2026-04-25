@@ -10,9 +10,11 @@ from app.blueprints.auth_check import bp as auth_check_bp
 from app.blueprints.dashboard import bp as  dashboard_bp
 from app.blueprints.logout import bp as logout_bp
 from app.blueprints.change_password import bp as change_pass_bp
+from app.blueprints.donation import bp as donation_bp
 from app.blueprints.api import bp as api_bp
 from app.models.user import User
 from app.models.ngo import NGO
+
 
 from app.extensions import db 
 from app.extensions import jwt
@@ -37,6 +39,7 @@ def create_app():
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(change_pass_bp)
     app.register_blueprint(api_bp)
+    app.register_blueprint(donation_bp)
 
     database_url = os.getenv("DATABASE_URL")
     if not database_url:

@@ -6,3 +6,4 @@ bp = Blueprint("donate",__name__)
 def donate():
     if request.method == 'GET':
         return render_template("Donate.html")
+    

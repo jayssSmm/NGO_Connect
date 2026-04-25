@@ -73,6 +73,28 @@
             alert('Minimum donation is 1 INR.');
             return;
         }
+
+        try {
+            const res = await fetch('/api/donate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'same-origin',
+                body:  JSON.stringify({
+                    user_id: currentUserId,
+                    ngo_id:  currentNGO.ngo_id,   // make sure currentNGO has this field
+                    amount:  Number(amount)
+                })
+            });
+
+            if (!res.ok) {
+                alert('Failed to record donation. Please try again.');
+                return;
+            }
+        } catch (err) {
+            alert('Network error. Please try again.');
+            return;
+        }
+
         showRazorpayScanner(currentNGO, amount);
     }
 
