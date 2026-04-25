@@ -7,36 +7,48 @@
     <link rel="stylesheet" href="../static/styles.css">
     <link rel="stylesheet" href="../static/utility.css">
     <style>
-        .error-text { color: #e53e3e; margin: 0 0 16px; display: none; font-size: 0.95rem; }
-        .info-text { color: #166534; margin: 0 0 16px; display: none; font-size: 0.95rem; }
+        .spinner {
+            display: inline-block;
+            width: 13px;
+            height: 13px;
+            border: 2px solid currentColor;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            vertical-align: middle;
+            margin-right: 4px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="page-centered">
     <div class="signup-form">
         <h2>Sign Up</h2>
-        <p id="signupError" class="error-text"></p>
+
         <form id="registerForm">
-            <input type="hidden" id="nextUrl" name="next" value="{{ next_url }}">
-            <input type="text" id="fullName" name="full_name" placeholder="Full Name" required>
-            <input type="email" id="email" name="email" placeholder="Email" required>
-            <input type="password" id="password" name="password" placeholder="Create Password" required>
-            <button type="submit">Sign Up</button>
+            <input type="text" id="fullName" placeholder="Full Name" required>
+            <input type="email" id="email" placeholder="Email" required>
+            <input type="password" id="password" placeholder="Create Password" required>
+            <p id="registerError" style="color:red; display:none;"></p>
+            <button type="submit" id="registerBtn">Sign Up</button>
         </form>
+
         <div class="login-link">
             <p>Already have an account? <a href="/login">Login</a></p>
         </div>
     </div>
 
     <script>
-        document.getElementById('registerForm').addEventListener('submit', async function (e) {
-            e.preventDefault();
-            const errorEl = document.getElementById('signupError');
-            errorEl.style.display = 'none';
+        const nextUrl = new URLSearchParams(window.location.search).get('next') || '/';
 
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const btn = document.getElementById('registerBtn');
+            const errorEl = document.getElementById('registerError');
             const fullName = document.getElementById('fullName').value.trim();
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
-            const nextUrl = document.getElementById('nextUrl').value || '/';
 
             if (!fullName || !email || !password) {
                 errorEl.textContent = 'Please fill in all fields.';
@@ -44,23 +56,32 @@
                 return;
             }
 
+            btn.disabled = true;
+            btn.innerHTML = `<span class="spinner"></span> Creating account...`;
+            errorEl.style.display = 'none';
+
             try {
                 const res = await fetch('/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ full_name: fullName, email, password, next: nextUrl })
                 });
+
                 const data = await res.json();
 
-                if (!res.ok) {
-                    errorEl.textContent = data.error || 'Unable to sign up. Please try again.';
-                    errorEl.style.display = 'block';
-                } else {
+                if (res.ok) {
                     window.location.href = data.redirect || '/';
+                } else {
+                    errorEl.textContent = data.error || 'Something went wrong.';
+                    errorEl.style.display = 'block';
                 }
-            } catch (err) {
-                errorEl.textContent = 'Unable to sign up right now. Please try again later.';
+
+            } catch {
+                errorEl.textContent = 'Network error. Please try again.';
                 errorEl.style.display = 'block';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Sign Up';
             }
         });
     </script>

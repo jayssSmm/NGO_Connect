@@ -5,8 +5,6 @@ from flask_jwt_extended import create_access_token, set_access_cookies
 from urllib.parse import urlparse
 from sqlalchemy import text
 
-from datetime import datetime
-
 from app.utils.otp_generator import generate_otp
 from app.tasks.otp_mail import send_email
 from app.extensions import redis_client
