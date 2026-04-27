@@ -4,7 +4,14 @@ async function fetchNGOs(query = '') {
     const url = '/api/ngos' + (query ? `?q=${encodeURIComponent(query)}` : '');
     const res = await fetch(url, { credentials: 'same-origin' });
     const payload = await res.json();
-    return res.ok ? payload : [];
+
+    if (!res.ok) {
+        // 404 → { message: "...", ngos: [] }
+        return [];
+    }
+
+    // 200 → plain list
+    return Array.isArray(payload) ? payload : [];
 }
 
 async function checkAuth() {
