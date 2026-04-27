@@ -49,7 +49,7 @@
         </nav>
     </header>
     <main class="detail-page">
-        <a href="/" class="back-link">← Back to Home</a>
+        <div class="detail-actions"><a href="/" class="back-link">← Back to Home</a></div>
         {% if ngo %}
             <div class="detail-card">
                 <h1>{{ ngo.name }}</h1>
@@ -69,7 +69,7 @@
                 </div>
                 <div class="detail-actions">
                     <a href="/donate">Donate to this NGO</a>
-                    <a class="secondary" href="/volunteer">Volunteer with this NGO</a>
+                    <a class="secondary" href="/">Volunteer with this NGO</a>
                 </div>
             </div>
         {% else %}
@@ -82,5 +82,6 @@
     <footer>
         <p>&copy; 2024 NGO Connect. All rights reserved.</p>
     </footer>
+    <script src="../static/card.js"></script>
 </body>
 </html>
