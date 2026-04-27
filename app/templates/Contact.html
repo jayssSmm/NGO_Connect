@@ -36,60 +36,22 @@
     </header>
     <main class="contact-container">
         <div class="contact-form">
-        <h2>Contact Us</h2>
-        <div class="contact-info">
-            <p><strong>Email:</strong> info@ngoconnect.org</p>
-            <p><strong>Phone:</strong> +91 12345 67890</p>
-            <p><strong>Working Address:</strong> 123 NGO Street, Kolkata, West Bengal, India - 700001</p>
-            <p><strong>Operating Hours:</strong> Monday to Friday, 9 AM - 6 PM</p>
-            <p><strong>Support:</strong> For any queries, feel free to reach out. We aim to respond within 24 hours.</p>
-        </div>
-        <form id="contactForm">
-            <input type="text" placeholder="Your Name" required>
-            <input type="email" placeholder="Your Email" required>
-            <textarea placeholder="Your Message" rows="5" required></textarea>
-            <button type="submit">Send Message</button>
-        </form>
+            <h2>Contact Us</h2>
+            <p class="contact-subtitle">Have a question or request? Send us a message and we’ll get back to you shortly.</p>
+            <div class="contact-details">
+                <p><strong>Email:</strong> miyamoto123.undersky@gmail.com</p>
+                <p><strong>Working Address:</strong> 123 Clover Street, Kolkata, West Bengal, India - 700001</p>
+                <p><strong>Support:</strong> For any query, feel free to reach out. We aim to respond within 24 hours.</p>
+            </div>
+            <form id="contactForm">
+                <input type="text" id="name" name="name" placeholder="Your Name" required>
+                <input type="email" id="email" name="email" placeholder="Your Email" required>
+                <textarea id="message" name="message" placeholder="Your Message" rows="6" required></textarea>
+                <button type="submit">Send Message</button>
+                <p id="messageFeedback" class="message-feedback"></p>
+            </form>
         </div>
     </main>
-    <script>
-        document.getElementById('contactForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            alert('Message sent successfully!');
-        });
-
-        function updateHeaderOnLoad() {
-            const userSession = sessionStorage.getItem('userSession');
-            const authButtons = document.querySelector('.auth-buttons');
-            
-            if (userSession && authButtons) {
-                const user = JSON.parse(userSession);
-                authButtons.innerHTML = `
-                    <div class="hamburger" onclick="toggleUserMenu()">☰ ${user.name || user.email}</div>
-                    <div class="user-menu" id="userMenu" style="display:none;">
-                        <a href="Dashboard.html">Dashboard</a>
-                        <a href="#" onclick="logout()">Logout</a>
-                    </div>
-                `;
-            }
-        }
-
-        function toggleUserMenu() {
-            const menu = document.getElementById('userMenu');
-            if (menu) {
-                menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
-            }
-        }
-
-        function logout() {
-            sessionStorage.removeItem('userSession');
-            sessionStorage.removeItem('userType');
-            sessionStorage.removeItem('notifications');
-            alert('Logged out successfully!');
-            window.location.reload();
-        }
-
-        window.addEventListener('load', updateHeaderOnLoad);
-    </script>
+    <script src="../static/Contact.js"></script>
 </body>
 </html>

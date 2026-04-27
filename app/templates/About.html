@@ -91,39 +91,6 @@
     <footer>
         <p>&copy; 2024 NGO Connect. All rights reserved.</p>
     </footer>
-    <script>
-        function updateHeaderOnLoad() {
-            const userSession = sessionStorage.getItem('userSession');
-            const authButtons = document.querySelector('.auth-buttons');
-            
-            if (userSession && authButtons) {
-                const user = JSON.parse(userSession);
-                authButtons.innerHTML = `
-                    <div class="hamburger" onclick="toggleUserMenu()">☰ ${user.name || user.email}</div>
-                    <div class="user-menu" id="userMenu" style="display:none;">
-                        <a href="Dashboard.html">Dashboard</a>
-                        <a href="#" onclick="logout()">Logout</a>
-                    </div>
-                `;
-            }
-        }
-
-        function toggleUserMenu() {
-            const menu = document.getElementById('userMenu');
-            if (menu) {
-                menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
-            }
-        }
-
-        function logout() {
-            sessionStorage.removeItem('userSession');
-            sessionStorage.removeItem('userType');
-            sessionStorage.removeItem('notifications');
-            alert('Logged out successfully!');
-            window.location.reload();
-        }
-
-        window.addEventListener('load', updateHeaderOnLoad);
-    </script>
+    <script src="../static/About.js"></script>
 </body>
 </html>

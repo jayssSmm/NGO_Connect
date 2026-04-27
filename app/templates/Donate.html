@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -8,6 +8,18 @@
     <link rel="stylesheet" href="../static/utility.css">
 </head>
 <body>
+    <div id="auth-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:999; align-items:center; justify-content:center;">
+        <div style="background:#fff; border-radius:12px; padding:2rem 2.5rem; max-width:360px; width:90%; text-align:center; box-shadow: 0 8px 32px rgba(0,0,0,0.18);">
+            <div style="font-size:2rem; margin-bottom:0.75rem;">🔒</div>
+            <h3 style="margin:0 0 0.5rem; font-size:1.1rem; font-weight:600;">Login Required</h3>
+            <p style="margin:0 0 1.5rem; font-size:0.9rem; color:#666;">You need to be logged in to access this feature.</p>
+            <div style="display:flex; gap:0.75rem; justify-content:center; flex-wrap:wrap;">
+                <a href="/login" style="padding:0.55rem 1.4rem; background:#2563eb; color:#fff; border-radius:7px; text-decoration:none; font-size:0.9rem; font-weight:500;">Login</a>
+                <a href="/register" style="padding:0.55rem 1.4rem; background:#f3f4f6; color:#374151; border-radius:7px; text-decoration:none; font-size:0.9rem; font-weight:500;">Sign Up</a>
+                <button onclick="closeModal()" style="padding:0.55rem 1.1rem; border:1px solid #e5e7eb; border-radius:7px; background:none; cursor:pointer; font-size:0.9rem; color:#6b7280;">Cancel</button>
+            </div>
+        </div>
+    </div>
     <header>
         <nav>
             <div class="nav-left">
@@ -35,25 +47,25 @@
         </nav>
     </header>
     <main>
-        <div class="bg">
-            <div class="search">
-                <input type="text" id="searchInput" placeholder="Search NGO">
-                <button onclick="searchNGOs()">Search</button>
+        <div class="bg donate-page">
+            <div class="donate-search">
+                <input type="text" id="searchInput" placeholder="Search NGO to donate to">
+                <button type="button" onclick="searchNGOs()">Search</button>
             </div>
-            <div class="ngo-list" id="ngoList">
-                <!-- NGO list -->
-            </div>
-            <div class="donation-section" id="donationSection">
-                <h3>Donate to <span id="ngoName"></span></h3>
-                <div>
-                    <h4>Donate Money</h4>
-                    <input type="number" id="amount" placeholder="Amount (min 1 INR)" min="1">
-                    <button onclick="donateMoney()">Donate Money</button>
-                </div>
-                <div>
-                    <h4>Donate Items</h4>
-                    <textarea id="items" placeholder="List items you want to donate"></textarea>
-                    <button onclick="donateItems()">Donate Items</button>
+            <div class="donate-layout">
+                <div class="ngo-list" id="ngoList"></div>
+                <div class="donation-section" id="donationSection" style="display:none;">
+                    <h3>Donate to <span id="ngoName">select an NGO</span></h3>
+                    <div class="donation-block">
+                        <h4>Donate Money</h4>
+                        <input type="number" id="amount" min="1" placeholder="Amount (min 1 INR)">
+                        <button type="button" onclick="donateMoney()">Donate Money</button>
+                    </div>
+                    <div class="donation-block">
+                        <h4>Donate Items</h4>
+                        <textarea id="items" placeholder="List items you want to donate" rows="5"></textarea>
+                        <button type="button" onclick="donateItems()">Donate Items</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -61,151 +73,27 @@
     <footer>
         <p>&copy; 2024 NGO Connect. All rights reserved.</p>
     </footer>
-    <script>
-        let currentNGO = null;
-        let isLoggedIn = false;
-        let userType = 'guest'; // 'guest' or 'registered'
-        
-        const ngos = [
-            { name: 'Green Earth NGO', location: 'Kolkata', scannerId: 'GE001' },
-            { name: 'Helping Hands', location: 'Delhi', scannerId: 'HH002' },
-            { name: 'Child Care Foundation', location: 'Mumbai', scannerId: 'CCF003' },
-        ];
-
-        // Check login status on page load
-        function checkLoginStatus() {
-            const userSession = sessionStorage.getItem('userSession');
-            if (userSession) {
-                isLoggedIn = true;
-                userType = sessionStorage.getItem('userType') || 'registered';
-            }
-        }
-
-        function searchNGOs() {
-            const query = document.getElementById('searchInput').value.toLowerCase();
-            const filtered = ngos.filter(ngo => ngo.name.toLowerCase().includes(query));
-            displayNGOs(filtered);
-        }
-
-        function displayNGOs(ngos) {
-            const list = document.getElementById('ngoList');
-            list.innerHTML = '';
-            ngos.forEach(ngo => {
-                const item = document.createElement('div');
-                item.className = 'ngo-item';
-                item.innerHTML = `<h4>${ngo.name}</h4><p>Location: ${ngo.location}</p>`;
-                item.onclick = () => selectNGO(ngo);
-                list.appendChild(item);
-            });
-        }
-
-        function selectNGO(ngo) {
-            currentNGO = ngo;
-            document.getElementById('ngoName').textContent = ngo.name;
-            document.getElementById('donationSection').style.display = 'block';
-        }
-
-        function donateMoney() {
-            const amount = document.getElementById('amount').value;
-            if (!amount || amount < 1) {
-                alert('Minimum donation is 1 INR.');
-                return;
-            }
-
-            // Show dummy Razorpay scanner
-            showRazorpayScanner(currentNGO, amount);
-        }
-
-        function showRazorpayScanner(ngo, amount) {
-            const scannerCode = `
-RAZORPAY_QR_CODE_${ngo.scannerId}
-Amount: ${amount} INR
-NGO: ${ngo.name}
-Scan this code with any UPI app to proceed with payment.
-
-Dummy QR: [QR_${ngo.scannerId}_${Date.now()}]
-            `;
-            
-            alert('Razorpay Dummy Scanner for ' + ngo.name + ':\n\n' + scannerCode + '\n\nAfter scanning and payment, you will receive confirmation.');
-            
-            // Simulate payment confirmation
-            setTimeout(() => {
-                processMoneyDonation(ngo, amount);
-            }, 500);
-        }
-
-        function processMoneyDonation(ngo, amount) {
-            let message = `Payment of ${amount} INR sent to ${ngo.name}. `;
-            
-            if (isLoggedIn && userType === 'registered') {
-                message += 'Confirmation received on both website and payment app.';
-                alert(message);
-                addNotification(`Donation of ${amount} INR to ${ngo.name} confirmed.`);
-            } else {
-                message += 'Confirmation received on payment app.';
-                alert(message);
-            }
-            
-            document.getElementById('amount').value = '';
-        }
-
-        function donateItems() {
-            if (!isLoggedIn) {
-                alert('Please log in or sign up to donate items.');
-                return;
-            }
-            
-            const items = document.getElementById('items').value;
-            if (items.trim()) {
-                alert('Item list sent to ' + currentNGO.name + '. You will be notified of acceptance/rejection on your dashboard and email.');
-            } else {
-                alert('Please list items to donate.');
-            }
-        }
-
-        function addNotification(message) {
-            // Add to dashboard notifications (simulated)
-            const notifications = JSON.parse(sessionStorage.getItem('notifications') || '[]');
-            notifications.push(message);
-            sessionStorage.setItem('notifications', JSON.stringify(notifications));
-        }
-
-        window.onload = function() {
-            checkLoginStatus();
-            displayNGOs(ngos);
-            updateHeaderOnLoad();
-        };
-
-        function updateHeaderOnLoad() {
-            const userSession = sessionStorage.getItem('userSession');
-            const authButtons = document.querySelector('.auth-buttons');
-            
-            if (userSession && authButtons) {
-                const user = JSON.parse(userSession);
-                authButtons.innerHTML = `
-                    <div class="hamburger" onclick="toggleUserMenu()">☰ ${user.name || user.email}</div>
-                    <div class="user-menu" id="userMenu" style="display:none;">
-                        <a href="Dashboard.html">Dashboard</a>
-                        <a href="#" onclick="logout()">Logout</a>
-                    </div>
-                `;
-            }
-        }
-
-        function toggleUserMenu() {
-            const menu = document.getElementById('userMenu');
-            if (menu) {
-                menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
-            }
-        }
-
-        function logout() {
-            sessionStorage.removeItem('userSession');
-            sessionStorage.removeItem('userType');
-            sessionStorage.removeItem('notifications');
-            alert('Logged out successfully!');
-            window.location.reload();
-        }
-    </script>
+    <style>
+        .donate-page { display:flex; flex-direction:column; align-items:center; justify-content:flex-start; min-height:calc(100vh - 160px); padding:40px 20px 32px; gap:24px; }
+        .donate-search { display:flex; width:100%; max-width:780px; gap:10px; justify-content:center; align-items:center; }
+        .donate-search input { flex:1; padding:14px 16px; border-radius:12px; border:1px solid #cbd5e1; font-size:1rem; }
+        .donate-search button { min-width:140px; padding:14px 18px; border:none; border-radius:12px; background:#4f46e5; color:#fff; font-size:1rem; cursor:pointer; }
+        .donate-layout { width:100%; max-width:1240px; display:grid; grid-template-columns:1fr 380px; gap:24px; }
+        .ngo-list { display:grid; gap:16px; }
+        .ngo-item { padding:18px 20px; border-radius:18px; border:1px solid #e2e8f0; background:#fff; cursor:pointer; transition:transform .15s ease, box-shadow .15s ease; }
+        .ngo-item:hover { transform:translateY(-2px); box-shadow:0 14px 35px rgba(15,23,42,.08); }
+        .ngo-item h4 { margin:0 0 8px; font-size:1rem; color:#1f2937; }
+        .ngo-item p { margin:4px 0; color:#475569; font-size:0.95rem; }
+        .donation-section { display:grid; gap:18px; background:#fff; border:1px solid #e2e8f0; border-radius:20px; padding:24px; min-height:280px; }
+        .donation-section h3 { margin:0 0 8px; font-size:1.2rem; color:#111827; }
+        .donation-block { display:flex; flex-direction:column; gap:10px; }
+        .donation-block h4 { margin:0; font-size:1rem; color:#1f2937; }
+        .donation-block input, .donation-block textarea { width:100%; border:1px solid #cbd5e1; border-radius:14px; padding:14px 16px; font-size:1rem; resize:vertical; }
+        .donation-block button { width:100%; padding:14px 18px; border:none; border-radius:14px; background:#2563eb; color:#fff; font-size:1rem; cursor:pointer; }
+        .donation-section.hide { display:none; }
+        @media(max-width:980px){ .donate-layout { grid-template-columns:1fr; } }
+        @media(max-width:720px){ .donate-search { flex-direction:column; } }
+    </style>
+    <script src="../static/Donate.js"></script>
 </body>
 </html>

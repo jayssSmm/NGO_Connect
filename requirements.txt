@@ -2,4 +2,9 @@ flask
 flask_jwt_extended
 dotenv
 redis
+<<<<<<< HEAD
 flask_sqlalchemy
+=======
+flask_sqlalchemy
+psycopg2
+>>>>>>> changes

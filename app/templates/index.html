@@ -24,8 +24,8 @@
             <div class="nav-center">
                 <div class="options">
                     <a type="explore" class="option" href="/explore">Explore NGOs</a>
-                    <a type="donate" class="option" href="/donate">Donate</a>
-                    <a type="volunteer" class="option" href="/volunteer">Volunteer</a>
+                    <a type="donate" class="option auth" href="/donate">Donate</a>
+                    <a type="volunteer" class="option auth" href="/volunteer">Volunteer</a>
                 </div>
             </div>
             <div class="auth-buttons">
@@ -52,23 +52,26 @@
         </div>
     </main>
     <footer class="flex-all-center">
-        <!-- <p>&copy; 2026 NGO Connect. All rights reserved</p> -->
          <p>Help as much as you can &#x1F60A;</p>
     </footer>
     <script>
-        function updateHeaderOnLoad() {
-            const userSession = sessionStorage.getItem('userSession');
-            const authButtons = document.querySelector('.auth-buttons');
-            
-            if (userSession && authButtons) {
-                const user = JSON.parse(userSession);
-                authButtons.innerHTML = `
-                    <div class="hamburger" onclick="toggleUserMenu()">☰ ${user.name || user.email}</div>
-                    <div class="user-menu" id="userMenu" style="display:none;">
-                        <a href="/dashboard">Dashboard</a>
-                        <a href="#" onclick="logout()">Logout</a>
-                    </div>
-                `;
+        async function updateHeaderOnLoad() {
+            try {
+                const res = await fetch('/api/auth/check', { credentials: 'same-origin' });
+                const authButtons = document.querySelector('.auth-buttons');
+                if (!authButtons) return;
+
+                if (res.ok) {
+                    authButtons.innerHTML = `
+                        <div class="hamburger" onclick="toggleUserMenu()">☰ My Account</div>
+                        <div class="user-menu" id="userMenu" style="display:none;">
+                            <a href="/dashboard">Dashboard</a>
+                            <a href="#" onclick="logout()">Logout</a>
+                        </div>
+                    `;
+                }
+            } catch {
+                // not logged in, keep default login/signup buttons
             }
         }
 
@@ -79,12 +82,12 @@
             }
         }
 
-        function logout() {
-            sessionStorage.removeItem('userSession');
-            sessionStorage.removeItem('userType');
-            sessionStorage.removeItem('notifications');
-            alert('Logged out successfully!');
-            window.location.reload();
+        async function logout() {
+            await fetch('/logout', {
+                method: 'POST',
+                credentials: 'same-origin'
+            });
+            window.location.href = '/';
         }
 
         window.addEventListener('load', updateHeaderOnLoad);

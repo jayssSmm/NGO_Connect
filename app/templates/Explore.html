@@ -35,145 +35,56 @@
         </nav>
     </header>
     <main>
-        <div class="bg">
-            <div class="nav-center">
-                <div class="search">
-                    <input type="text" id="searchInput" placeholder="Search NGOs">
-                    <button type="submit" onclick="searchNGOs()">Search</button>
-                </div>
+        <div class="bg explore-container">
+            <div class="explore-search">
+                <input type="text" id="searchInput" placeholder="Search NGOs">
+                <button type="button" onclick="searchNGOs()">Search</button>
             </div>
+            <div class="or-divider"></div>
             <div class="near-you">
                 <h3>Want to know NGOs near you?</h3>
-                <input type="text" id="coordsInput" placeholder="Paste your coordinates here (latitude, longitude)">
-                <button onclick="getLocation()">Get My Location</button>
-                <button onclick="findNearbyNGOs()">Find Nearby NGOs</button>
+                <div class="coords-row">
+                    <div class="coords-input-wrap">
+                        <input type="text" id="coordsInput" placeholder="Write Location / Paste Coordinates">
+                        <button type="button" class="inner-btn" onclick="getLocation()">Get My Location</button>
+                    </div>
+                    <button type="button" class="find-btn" onclick="findNearbyNGOs()">Find NGOs Near Me</button>
+                </div>
+                <p class="location-message" id="locationMessage"></p>
             </div>
             <div class="ngo-list" id="ngoList">
                 <!-- NGO list will be populated here -->
             </div>
         </div>
     </main>
+    <style>
+        .explore-container { display:flex; flex-direction:column; align-items:center; justify-content:flex-start; min-height:calc(100vh - 180px); padding:40px 18px 24px; text-align:center; gap:18px; }
+        .explore-search { display:flex; width:100%; max-width:680px; gap:10px; justify-content:center; align-items:center; }
+        .explore-search input { flex:1; min-width:0; padding:14px 16px; border-radius:12px; border:1px solid #cbd5e1; font-size:1rem; }
+        .explore-search button { min-width:120px; padding:14px 18px; border:none; border-radius:12px; background:#4f46e5; color:#fff; font-size:1rem; cursor:pointer; }
+        .or-divider { width:100%; max-width:680px; font-size:0.95rem; color:#64748b; border-top:1px solid #e2e8f0; position:relative; line-height:0; margin:0 auto; }
+        .or-divider::after { content:'OR'; position:absolute; top:-10px; left:50%; transform:translateX(-50%); background:#f8fafc; padding:0 14px; color:#475569; font-size:0.95rem; }
+        .near-you { width:100%; max-width:680px; display:flex; flex-direction:column; gap:12px; }
+        .near-you h3 { margin:0; font-size:1.05rem; color:#1f2937; }
+        .coords-row { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; align-items:center; }
+        .coords-input-wrap { position:relative; flex:1 1 420px; min-width:260px; }
+        .coords-input-wrap input { width:100%; padding:14px 16px; padding-right:160px; border-radius:12px; border:1px solid #cbd5e1; font-size:1rem; }
+        .coords-input-wrap .inner-btn { position:absolute; top:50%; right: -143px; transform:translateY(-62%); padding:10px 14px; border:none; border-radius:10px; background:#2563eb; color:#fff; cursor:pointer; font-size:0.9rem; }
+        .find-btn { min-width:220px; padding:14px -1px; border:none; border-radius:12px; background:#2563eb; color:#fff; font-size:1rem; cursor:pointer; position:relative; right:-150px;}
+        .location-message { margin:0; min-height:20px; color:#e53e3e; font-size:0.95rem; text-align:center; }
+        .ngo-list { width:100%; max-width:1240px; display:grid; gap:16px; margin-top:8px; }
+        .ngo-item { padding:18px 20px; border-radius:18px; border:1px solid #e2e8f0; background:#fff; text-align:left; transition:transform .15s ease, box-shadow .15s ease; }
+        .ngo-item:hover { transform:translateY(-2px); box-shadow:0 14px 35px rgba(15,23,42,.08); }
+        .ngo-link { text-decoration:none; color:#1f2937; }
+        .ngo-link:hover { text-decoration:underline; }
+        .ngo-item h4 { margin:0 0 8px; font-size:1.1rem; }
+        .ngo-item p { margin:4px 0; color:#475569; font-size:0.95rem; }
+        .no-results { padding:22px; border-radius:18px; border:1px solid #e2e8f0; background:#f8fafc; color:#475569; }
+        @media(max-width:720px){ .explore-search { flex-direction:column; } .coords-row { flex-direction:column; } .coords-input-wrap input { padding-right:110px; } }
+    </style>
     <footer>
         <p>&copy; 2024 NGO Connect. All rights reserved.</p>
     </footer>
-    <script>
-        function searchNGOs() {
-            const query = document.getElementById('searchInput').value.toLowerCase();
-            const ngos = [
-                { name: 'Green Earth NGO', location: 'Kolkata', lat: 22.5726, lng: 88.3639 },
-                { name: 'Helping Hands', location: 'Delhi', lat: 28.7041, lng: 77.1025 },
-                { name: 'Child Care Foundation', location: 'Mumbai', lat: 19.0760, lng: 72.8777 },
-                // Add more dummy NGOs
-            ];
-            const filtered = ngos.filter(ngo => ngo.name.toLowerCase().includes(query) || ngo.location.toLowerCase().includes(query));
-            displayNGOs(filtered);
-        }
-
-        function getLocation() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(function(position) {
-                    const lat = position.coords.latitude;
-                    const lng = position.coords.longitude;
-                    const coords = `${lat}, ${lng}`;
-                    navigator.clipboard.writeText(coords).then(() => {
-                        alert('Coordinates copied to clipboard: ' + coords);
-                        document.getElementById('coordsInput').value = coords;
-                    });
-                });
-            } else {
-                alert('Geolocation is not supported by this browser.');
-            }
-        }
-
-        function findNearbyNGOs() {
-            const coords = document.getElementById('coordsInput').value.split(',').map(c => parseFloat(c.trim()));
-            if (coords.length !== 2 || isNaN(coords[0]) || isNaN(coords[1])) {
-                alert('Please enter valid coordinates.');
-                return;
-            }
-            const userLat = coords[0];
-            const userLng = coords[1];
-            const ngos = [
-                { name: 'Green Earth NGO', location: 'Kolkata', lat: 22.5726, lng: 88.3639 },
-                { name: 'Helping Hands', location: 'Delhi', lat: 28.7041, lng: 77.1025 },
-                { name: 'Child Care Foundation', location: 'Mumbai', lat: 19.0760, lng: 72.8777 },
-            ];
-            const nearby = ngos.filter(ngo => {
-                const distance = getDistance(userLat, userLng, ngo.lat, ngo.lng);
-                return distance <= 5; // 5km radius
-            });
-            displayNGOs(nearby);
-        }
-
-        function getDistance(lat1, lng1, lat2, lng2) {
-            const R = 6371; // Radius of the earth in km
-            const dLat = deg2rad(lat2 - lat1);
-            const dLng = deg2rad(lng2 - lng1);
-            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                      Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
-                      Math.sin(dLng/2) * Math.sin(dLng/2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-            const d = R * c; // Distance in km
-            return d;
-        }
-
-        function deg2rad(deg) {
-            return deg * (Math.PI/180);
-        }
-
-        function displayNGOs(ngos) {
-            const list = document.getElementById('ngoList');
-            list.innerHTML = '';
-            ngos.forEach(ngo => {
-                const item = document.createElement('div');
-                item.className = 'ngo-item';
-                item.innerHTML = `<h4>${ngo.name}</h4><p>Location: ${ngo.location}</p>`;
-                list.appendChild(item);
-            });
-        }
-
-        // Load all NGOs initially
-        window.onload = function() {
-            const ngos = [
-                { name: 'Green Earth NGO', location: 'Kolkata', lat: 22.5726, lng: 88.3639 },
-                { name: 'Helping Hands', location: 'Delhi', lat: 28.7041, lng: 77.1025 },
-                { name: 'Child Care Foundation', location: 'Mumbai', lat: 19.0760, lng: 72.8777 },
-            ];
-            displayNGOs(ngos);
-        };
-
-        function updateHeaderOnLoad() {
-            const userSession = sessionStorage.getItem('userSession');
-            const authButtons = document.querySelector('.auth-buttons');
-            
-            if (userSession && authButtons) {
-                const user = JSON.parse(userSession);
-                authButtons.innerHTML = `
-                    <div class="hamburger" onclick="toggleUserMenu()">☰ ${user.name || user.email}</div>
-                    <div class="user-menu" id="userMenu" style="display:none;">
-                        <a href="Dashboard.html">Dashboard</a>
-                        <a href="#" onclick="logout()">Logout</a>
-                    </div>
-                `;
-            }
-        }
-
-        function toggleUserMenu() {
-            const menu = document.getElementById('userMenu');
-            if (menu) {
-                menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
-            }
-        }
-
-        function logout() {
-            sessionStorage.removeItem('userSession');
-            sessionStorage.removeItem('userType');
-            sessionStorage.removeItem('notifications');
-            alert('Logged out successfully!');
-            window.location.reload();
-        }
-
-        window.addEventListener('load', updateHeaderOnLoad);
-    </script>
+    <script src="../static/Explore.js"></script>
 </body>
 </html>
