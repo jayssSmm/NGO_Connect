@@ -16,6 +16,7 @@ def donate():
     user_id = get_jwt_identity()  # 🔥 THIS replaces currentUserId
     ngo_id = data.get("ngo_id")
     amount = data.get("amount")
+    ngo_name=data.get("ngo_name")
 
     if not ngo_id or not amount:
         return jsonify({"error": "Missing data"}), 400
@@ -23,10 +24,10 @@ def donate():
     # store donation
     db.session.execute(
         text("""
-            INSERT INTO donations (user_id, ngo_id, amount)
-            VALUES (:user_id, :ngo_id, :amount)
+            INSERT INTO donations (user_id, ngo_id, amount, ngo_name)
+            VALUES (:user_id, :ngo_id, :amount, :ngo_name)
         """),
-        {"user_id": user_id, "ngo_id": ngo_id, "amount": amount}
+        {"user_id": user_id, "ngo_id": ngo_id, "amount": amount, "ngo_name": ngo_name}
     )
     db.session.commit()
 

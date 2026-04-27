@@ -1,17 +1,17 @@
 from flask import Flask
 import os
-from app.blueprints.auth import bp as auth_bp
+from app.blueprints.auth.auth import bp as auth_bp
 from app.blueprints.main import bp as main_bp
 from app.blueprints.volunteer import bp as volunteer_bp
-from app.blueprints.donate import bp as donate_bp
+from app.blueprints.donation.donate import bp as donate_bp
 from app.blueprints.contact import bp as contact_bp
 from app.blueprints.explore import bp as explore_bp
-from app.blueprints.auth_check import bp as auth_check_bp
+from app.blueprints.auth.auth_check import bp as auth_check_bp
 from app.blueprints.dashboard import bp as  dashboard_bp
 from app.blueprints.logout import bp as logout_bp
-from app.blueprints.change_password import bp as change_pass_bp
-from app.blueprints.donation import donate_bp as donation_bp
-from app.blueprints.fetch_donation import bp as get_donation_bp
+from app.blueprints.auth.change_password import bp as change_pass_bp
+from app.blueprints.donation.donation import donate_bp as donation_bp
+from app.blueprints.donation.fetch_donation import bp as get_donation_bp
 from app.blueprints.api import bp as api_bp
 from app.models.user import User
 from app.models.ngo import NGO

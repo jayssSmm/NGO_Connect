@@ -17,8 +17,9 @@ def get_user_donations():
     result = [
         {
             "ngo_id": d.ngo_id,
+            "ngo_name":d.ngo_name,
             "amount": d.amount,
-            "created_at": d.created_at
+            "created_at": d.donated_at
         }
         for d in donations
     ]

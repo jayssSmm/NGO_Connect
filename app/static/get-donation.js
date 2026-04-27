@@ -2,7 +2,7 @@
 
 async function fetchDonations() {
     try {
-        const res = await fetch('/api/donations', {
+        const res = await fetch('/api/get-donations', {
             method: 'GET',
             credentials: 'include' // 🔥 important for JWT cookies
         });
@@ -23,24 +23,24 @@ async function fetchDonations() {
 
 
 function renderDonations(donations) {
-    const container = document.getElementById("donations-list");
+    const container = document.getElementById("impactList");
     if (!container) return;
 
     container.innerHTML = "";
 
     if (donations.length === 0) {
-        container.innerHTML = "<p>No donations yet.</p>";
+        container.innerHTML = '<div class="impact-item"><p>No donations yet.</p></div>';
         return;
     }
 
     donations.forEach(d => {
         const div = document.createElement("div");
-        div.classList.add("donation-card");
+        div.classList.add("impact-item");
 
         div.innerHTML = `
-            <p><strong>NGO:</strong> ${d.ngo_name || d.ngo_id}</p>
-            <p><strong>Amount:</strong> ₹${d.amount}</p>
-            <p><small>${d.created_at || ''}</small></p>
+            <p><strong>NGO: </strong> ${d.ngo_name || d.ngo_id}
+            <strong>Amount: </strong> ₹${d.amount}
+            <strong>At: </strong><small>${d.created_at || ''}</small></p>
             <hr>
         `;
 

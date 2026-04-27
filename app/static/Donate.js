@@ -73,13 +73,13 @@
             alert('Minimum donation is 1 INR.');
             return;
         }
-
         try {
             const res = await fetch('/api/donate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
                 body:  JSON.stringify({
+                    ngo_name: currentNGO.name,
                     ngo_id:  currentNGO.ngo_id,   // make sure currentNGO has this field
                     amount:  Number(amount)
                 })
