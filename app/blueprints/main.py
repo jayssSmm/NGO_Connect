@@ -1,10 +1,11 @@
-from flask import Blueprint,render_template
+from flask import Blueprint,render_template,request
 
 bp = Blueprint("main",__name__)
 
-@bp.route("/")
-def index():
-    return render_template("index.html")
+@bp.route('/',methods=['GET','POST'])
+def volunteer():
+    if request.method == 'GET':
+        return render_template("Volunteer.html")
 
 @bp.route("/about")
 def about():

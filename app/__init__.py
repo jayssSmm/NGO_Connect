@@ -2,18 +2,15 @@ from flask import Flask
 import os
 from app.blueprints.auth.auth import bp as auth_bp
 from app.blueprints.main import bp as main_bp
-from app.blueprints.volunteer.volunteer import bp as volunteer_bp
 from app.blueprints.donation.donate import bp as donate_bp
 from app.blueprints.contact import bp as contact_bp
-from app.blueprints.explore import bp as explore_bp
 from app.blueprints.auth.auth_check import bp as auth_check_bp
 from app.blueprints.dashboard import bp as  dashboard_bp
 from app.blueprints.logout import bp as logout_bp
 from app.blueprints.auth.change_password import bp as change_pass_bp
 from app.blueprints.donation.donation import donate_bp as donation_bp
 from app.blueprints.donation.fetch_donation import bp as get_donation_bp
-from app.blueprints.volunteer.volunteer_applications import bp as volunteer_application_bp
-from app.blueprints.volunteer.fetch_volunteer import bp as fetch_volunteer_bp
+from app.blueprints.volunteer import bp as fetch_volunteer_bp
 from app.blueprints.api import bp as api_bp
 from app.models.user import User
 from app.models.ngo import NGO
@@ -33,10 +30,8 @@ def create_app():
 
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp)
-    app.register_blueprint(volunteer_bp)
     app.register_blueprint(donate_bp)
     app.register_blueprint(contact_bp)
-    app.register_blueprint(explore_bp)
     app.register_blueprint(auth_check_bp)
     app.register_blueprint(logout_bp)
     app.register_blueprint(dashboard_bp)
@@ -44,7 +39,6 @@ def create_app():
     app.register_blueprint(api_bp)
     app.register_blueprint(donation_bp)
     app.register_blueprint(get_donation_bp)
-    app.register_blueprint(volunteer_application_bp)
     app.register_blueprint(fetch_volunteer_bp)
 
     database_url = os.getenv("DATABASE_URL")

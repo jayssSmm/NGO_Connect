@@ -3,12 +3,7 @@ from flask import Blueprint,request,render_template,abort
 from app.models.ngo import NGO
 from app.extensions import db
 
-bp = Blueprint("explore",__name__)
-
-@bp.route("/explore",methods=['GET','POST'])
-def explore():
-    if request.method == 'GET':
-        return render_template('Explore.html')
+bp = Blueprint("volunteer",__name__)
 
 @bp.route('/ngo/<string:ngo_id>', methods=['GET'])
 def ngo_detail(ngo_id):
