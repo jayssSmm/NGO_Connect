@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Volunteer with NGOs</title>
+    <link rel="stylesheet" href="static/styles.css">
+    <link rel="stylesheet" href="static/utility.css">
+</head>
+<body>
+<div id="auth-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:999; align-items:center; justify-content:center;">
+    <div style="background:#fff; border-radius:12px; padding:2rem 2.5rem; max-width:360px; width:90%; text-align:center; box-shadow: 0 8px 32px rgba(0,0,0,0.18);">
+        <div style="font-size:2rem; margin-bottom:0.75rem;">??</div>
+        <h3 style="margin:0 0 0.5rem; font-size:1.1rem; font-weight:600;">Login Required</h3>
+        <p style="margin:0 0 1.5rem; font-size:0.9rem; color:#666;">You need to be logged in to apply for volunteering.</p>
+        <div style="display:flex; gap:0.75rem; justify-content:center; flex-wrap:wrap;">
+            <a href="/login" style="padding:0.55rem 1.4rem; background:#2563eb; color:#fff; border-radius:7px; text-decoration:none; font-size:0.9rem; font-weight:500;">Login</a>
+            <a href="/register" style="padding:0.55rem 1.4rem; background:#f3f4f6; color:#374151; border-radius:7px; text-decoration:none; font-size:0.9rem; font-weight:500;">Sign Up</a>
+            <button onclick="closeModal()" style="padding:0.55rem 1.1rem; border:1px solid #e5e7eb; border-radius:7px; background:none; cursor:pointer; font-size:0.9rem; color:#6b7280;">Cancel</button>
+        </div>
+    </div>
+</div>
+    <header>
+        <nav>
+            <div class="nav-left">
+                <div class="logo">
+                    <a href="/">
+                        <img src="static/images/NGO_Connect.png" alt="NGO Connect Logo">
+                    </a>
+                </div>
+                <ul class="nav-links">
+                    <li><a href="/about">About</a></li>
+                    <li><a href="/contact">Contact</a></li>
+                </ul>
+            </div>
+            <div class="nav-center">
+                <div class="options">
+                    <a type="explore" class="option" href="/explore">Explore NGOs</a>
+                    <a type="donate" class="option" href="/donate">Donate</a>
+                    <a type="volunteer" class="option" href="/volunteer">Volunteer</a>
+                </div>
+            </div>
+            <div class="auth-buttons">
+                <a class="btn login" href="/login">Login</a>
+                <a class="btn signup" href="/register">Sign Up</a>
+            </div>
+        </nav>
+    </header>
+    <main>
+        <div class="bg volunteer-container">
+            <div class="volunteer-search">
+                <input type="text" id="searchInput" placeholder="Search NGOs">
+                <button type="button" onclick="searchNGOs()">Search</button>
+            </div>
+            <div class="volunteer-grid">
+                <div class="ngo-list" id="ngoList"></div>
+                <div class="volunteer-panel">
+                    <div class="volunteer-card">
+                        <h3 id="selectedNgoName">Select an NGO to view skill needs</h3>
+                        <p id="selectedNgoDetails">Click any NGO above to see what skills it is looking for.</p>
+                        <div class="skills-needed" id="skillsNeeded"></div>
+                        <textarea id="skillsInput" placeholder="Enter your skills here" rows="5"></textarea>
+                        <button type="button" id="applyBtn" onclick="applyVolunteer()">Apply to Volunteer</button>
+                        <p class="info-text" id="volunteerMessage"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <footer>
+        <p>&copy; 2024 NGO Connect. All rights reserved.</p>
+    </footer>
+    <style>
+        .volunteer-container { display:flex; flex-direction:column; align-items:center; justify-content:flex-start; min-height:calc(100vh - 160px); padding:40px 18px 24px; gap:24px; }
+        .volunteer-search { display:flex; width:100%; max-width:680px; gap:10px; justify-content:center; align-items:center; }
+        .volunteer-search input { flex:1; padding:14px 16px; border-radius:12px; border:1px solid #cbd5e1; font-size:1rem; }
+        .volunteer-search button { min-width:120px; padding:14px 18px; border:none; border-radius:12px; background:#2563eb; color:#fff; font-size:1rem; cursor:pointer; }
+        .volunteer-grid { width:100%; max-width:1240px; display:grid; grid-template-columns:1fr 360px; gap:24px; align-items:start; }
+        .ngo-list { display:grid; gap:16px; }
+        .ngo-card { padding:18px 20px; border-radius:20px; border:1px solid #e2e8f0; background:#fff; cursor:pointer; transition:transform .15s ease, box-shadow .15s ease; }
+        .ngo-card:hover { transform:translateY(-2px); box-shadow:0 14px 35px rgba(15,23,42,.08); }
+        .ngo-card h4 { margin:0 0 8px; font-size:1.05rem; color:#1f2937; }
+        .ngo-card p { margin:4px 0; color:#475569; font-size:0.95rem; }
+        .volunteer-panel { width:100%; max-width:360px; }
+        .volunteer-card { background:#fff; border:1px solid #e2e8f0; border-radius:20px; padding:24px; }
+        .volunteer-card h3 { margin:0 0 10px; font-size:1.15rem; color:#111827; }
+        .volunteer-card p { margin:0 0 16px; color:#475569; line-height:1.7; }
+        .skills-needed { background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; padding:14px; color:#334155; margin-bottom:16px; min-height:80px; }
+        #skillsInput { width:100%; min-height:120px; border:1px solid #cbd5e1; border-radius:14px; padding:12px 14px; resize:vertical; font-size:0.95rem; margin-bottom:14px; }
+        #applyBtn { width:100%; padding:14px 18px; border:none; border-radius:14px; background:#4f46e5; color:#fff; font-size:1rem; cursor:pointer; }
+        .info-text { margin-top:12px; color:#64748b; min-height:18px; font-size:0.95rem; }
+        @media(max-width:960px){ .volunteer-grid { grid-template-columns:1fr; } }
+        @media(max-width:720px){ .volunteer-search { flex-direction:column; } }
+    </style>
+    <script src="static/Volunteer.js"></script>
+</body>
+</html>

@@ -1,7 +1,14 @@
 from flask import Blueprint, request, jsonify
 from sqlalchemy import or_, func
+<<<<<<< HEAD
 
 from app.models.ngo import NGO
+=======
+import uuid
+
+from app.models.ngo import NGO
+from app.extensions import db
+>>>>>>> d5797a22cd40abfd58a3fc6f0fdc0721f830ccff
 
 bp = Blueprint("api", __name__, url_prefix="/api")
 
@@ -28,3 +35,19 @@ def get_ngos():
         return jsonify({"message": "Sorry, We could not find this NGO", "ngos": []}), 404
 
     return jsonify([ngo.to_dict() for ngo in ngos]), 200
+<<<<<<< HEAD
+=======
+
+@bp.route('/ngo/<string:ngo_id>', methods=['GET'])
+def get_ngo(ngo_id):
+    try:
+        ngo_uuid = uuid.UUID(ngo_id)
+    except ValueError:
+        return jsonify({"message": "Invalid NGO ID"}), 400
+
+    ngo = db.session.get(NGO, ngo_uuid)
+    if not ngo:
+        return jsonify({"message": "NGO not found"}), 404
+
+    return jsonify(ngo.to_dict()), 200
+>>>>>>> d5797a22cd40abfd58a3fc6f0fdc0721f830ccff

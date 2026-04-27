@@ -4,10 +4,16 @@ from app.tasks.otp_mail import send_contact_email
 
 bp = Blueprint("contact", __name__)
 
+<<<<<<< Updated upstream
 @bp.route("/contact", methods=["GET", "POST"])
 def contact():
     if request.method == 'GET':
         return render_template("Contact.html")
+=======
+bp = Blueprint("contact", __name__)
+
+@bp.route("/api/contact", methods=["POST"])
+def contact():
 
     data = request.get_json() or request.form
     name = data.get('name', '').strip()
@@ -28,3 +34,4 @@ def contact():
         return jsonify({"error": "Unable to send your message. Please try again later."}), 500
 
     return jsonify({"ok": True, "message": "Your message has been sent successfully."}), 200
+>>>>>>> Stashed changes

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explore NGOs</title>
+    <link rel="stylesheet" href="static/styles.css">
+    <link rel="stylesheet" href="static/utility.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="nav-left">
+                <div class="logo">
+                    <a href="/">
+                        <img src="static/images/NGO_Connect.png" alt="NGO Connect Logo">
+                    </a>
+                </div>
+                <ul class="nav-links">
+                    <li><a href="/about">About</a></li>
+                    <li><a href="/contact">Contact</a></li>
+                </ul>
+            </div>
+            <div class="nav-center">
+                <div class="options">
+                    <a type="explore" class="option" href="/explore">Explore NGOs</a>
+                    <a type="donate" class="option" href="/donate">Donate</a>
+                    <a type="volunteer" class="option" href="/volunteer">Volunteer</a>
+                </div>
+            </div>
+            <div class="auth-buttons">
+                <a class="btn login" href="/login">Login</a>
+                <a class="btn signup" href="/register">Sign Up</a>
+            </div>
+        </nav>
+    </header>
+    <main>
+        <div class="bg explore-container">
+            <div class="explore-search">
+                <input type="text" id="searchInput" placeholder="Search NGOs">
+                <button type="button" onclick="searchNGOs()">Search</button>
+            </div>
+            <div class="or-divider"></div>
+            <div class="near-you">
+                <h3>Want to know NGOs near you?</h3>
+                <div class="coords-row">
+                    <div class="coords-input-wrap">
+                        <input type="text" id="coordsInput" placeholder="Write Location / Paste Coordinates">
+                        <button type="button" class="inner-btn" onclick="getLocation()">Get My Location</button>
+                    </div>
+                    <button type="button" class="find-btn" onclick="findNearbyNGOs()">Find NGOs Near Me</button>
+                </div>
+                <p class="location-message" id="locationMessage"></p>
+            </div>
+            <div class="ngo-list" id="ngoList">
+                <!-- NGO list will be populated here -->
+            </div>
+        </div>
+    </main>
+    <style>
+        .explore-container { display:flex; flex-direction:column; align-items:center; justify-content:flex-start; min-height:calc(100vh - 180px); padding:40px 18px 24px; text-align:center; gap:18px; }
+        .explore-search { display:flex; width:100%; max-width:680px; gap:10px; justify-content:center; align-items:center; }
+        .explore-search input { flex:1; min-width:0; padding:14px 16px; border-radius:12px; border:1px solid #cbd5e1; font-size:1rem; }
+        .explore-search button { min-width:120px; padding:14px 18px; border:none; border-radius:12px; background:#4f46e5; color:#fff; font-size:1rem; cursor:pointer; }
+        .or-divider { width:100%; max-width:680px; font-size:0.95rem; color:#64748b; border-top:1px solid #e2e8f0; position:relative; line-height:0; margin:0 auto; }
+        .or-divider::after { content:'OR'; position:absolute; top:-10px; left:50%; transform:translateX(-50%); background:#f8fafc; padding:0 14px; color:#475569; font-size:0.95rem; }
+        .near-you { width:100%; max-width:680px; display:flex; flex-direction:column; gap:12px; }
+        .near-you h3 { margin:0; font-size:1.05rem; color:#1f2937; }
+        .coords-row { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; align-items:center; }
+        .coords-input-wrap { position:relative; flex:1 1 420px; min-width:260px; }
+        .coords-input-wrap input { width:100%; padding:14px 16px; padding-right:160px; border-radius:12px; border:1px solid #cbd5e1; font-size:1rem; }
+        .coords-input-wrap .inner-btn { position:absolute; top:50%; right: -143px; transform:translateY(-62%); padding:10px 14px; border:none; border-radius:10px; background:#2563eb; color:#fff; cursor:pointer; font-size:0.9rem; }
+        .find-btn { min-width:220px; padding:14px -1px; border:none; border-radius:12px; background:#2563eb; color:#fff; font-size:1rem; cursor:pointer; position:relative; right:-150px;}
+        .location-message { margin:0; min-height:20px; color:#e53e3e; font-size:0.95rem; text-align:center; }
+        .ngo-list { width:100%; max-width:1240px; display:grid; gap:16px; margin-top:8px; }
+        .ngo-item { padding:18px 20px; border-radius:18px; border:1px solid #e2e8f0; background:#fff; text-align:left; transition:transform .15s ease, box-shadow .15s ease; }
+        .ngo-item:hover { transform:translateY(-2px); box-shadow:0 14px 35px rgba(15,23,42,.08); }
+        .ngo-link { text-decoration:none; color:#1f2937; }
+        .ngo-link:hover { text-decoration:underline; }
+        .ngo-item h4 { margin:0 0 8px; font-size:1.1rem; }
+        .ngo-item p { margin:4px 0; color:#475569; font-size:0.95rem; }
+        .no-results { padding:22px; border-radius:18px; border:1px solid #e2e8f0; background:#f8fafc; color:#475569; }
+        @media(max-width:720px){ .explore-search { flex-direction:column; } .coords-row { flex-direction:column; } .coords-input-wrap input { padding-right:110px; } }
+    </style>
+    <footer>
+        <p>&copy; 2024 NGO Connect. All rights reserved.</p>
+    </footer>
+    <script src="static/Explore.js"></script>
+</body>
+</html>
