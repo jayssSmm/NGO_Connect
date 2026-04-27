@@ -89,6 +89,30 @@
             setVolunteerMessage('Please add your skills before applying.', true);
             return;
         }
+
+        try {
+            const res = await fetch('/api/volunteer/apply', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({
+                    ngo_id:          currentNGO.ngo_id,
+                    ngo_name:        currentNGO.name,
+                    skill_needed:    currentNGO.focus,
+                    skill_provided:  skills
+                })
+            });
+
+            if (!res.ok) {
+                setVolunteerMessage('Failed to submit application. Please try again.', true);
+                return;
+            }
+        } catch (err) {
+            console.log(err);
+            setVolunteerMessage('Network error. Please try again.', true);
+            return;
+        }
+
         setVolunteerMessage(`Application sent to ${currentNGO.name}. You will be notified about the next steps.`, false);
         document.getElementById('skillsInput').value = '';
     }
