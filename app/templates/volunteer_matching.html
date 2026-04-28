@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Volunteer–Task Matching</title>
+    <link rel="stylesheet" href="../static/styles.css">
+    <link rel="stylesheet" href="../static/utility.css">
+    <link rel="stylesheet" href="../static/ngo_features.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="nav-left">
+                <div class="logo">
+                    <a href="/">
+                        <img src="../static/images/NGO_Connect.png" alt="NGO Connect Logo">
+                    </a>
+                </div>
+                <ul class="nav-links">
+                    <li><a href="/about">About</a></li>
+                    <li><a href="/contact">Contact</a></li>
+                </ul>
+            </div>
+            <div class="nav-center">
+                <div class="options">
+                    <a class="option" href="/donate">Donate</a>
+                </div>
+            </div>
+            <div class="auth-buttons">
+                <a class="btn login" href="/login">Login</a>
+                <a class="btn signup" href="/register">Sign Up</a>
+            </div>
+        </nav>
+    </header>
+    {% include 'features_nav.html' %}
+    <main class="page-content" data-page="volunteer-match">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Volunteer–Task Matching</h1>
+                <p class="page-subtitle">Enter a volunteer profile and instantly find the best Kolkata NGO match based on skills, location, and availability.</p>
+            </div>
+        </div>
+        <div class="grid-two">
+            <div class="section-card">
+                <form id="matchForm" class="field-group">
+                    <div class="field-group">
+                        <label for="volunteerName">Name</label>
+                        <input type="text" id="volunteerName" placeholder="Enter volunteer name">
+                    </div>
+                    <div class="field-group">
+                        <label for="skills">Skills</label>
+                        <select id="skills" multiple size="5">
+                            <option>Medical</option>
+                            <option>Education</option>
+                            <option>Tech</option>
+                            <option>Legal</option>
+                            <option>Physical</option>
+                        </select>
+                    </div>
+                    <div class="field-group">
+                        <label for="location">Location</label>
+                        <select id="location">
+                            <option>Salt Lake, Sector V, Kolkata</option>
+                            <option>Behala, Kolkata</option>
+                            <option>Park Circus, Kolkata</option>
+                            <option>New Town, Kolkata</option>
+                            <option>Garia, Kolkata</option>
+                            <option>Sealdah, Kolkata</option>
+                            <option>Howrah (near Kolkata)</option>
+                            <option>Barasat (Greater Kolkata)</option>
+                        </select>
+                    </div>
+                    <div class="field-group">
+                        <label for="availability">Availability</label>
+                        <select id="availability">
+                            <option>Weekdays</option>
+                            <option>Weekends</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="primary-btn">Find Matches</button>
+                </form>
+            </div>
+            <div class="section-card">
+                <h2 id="matchSummary">Find your best NGO matches</h2>
+                <div id="matchResults"></div>
+            </div>
+        </div>
+    </main>
+    <footer><p>&copy; 2024 NGO Connect. All rights reserved.</p></footer>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="../static/ngo_features.js"></script>
+</body>
+</html>

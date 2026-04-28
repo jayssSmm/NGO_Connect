@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Volunteer Trust System</title>
+    <link rel="stylesheet" href="../static/styles.css">
+    <link rel="stylesheet" href="../static/utility.css">
+    <link rel="stylesheet" href="../static/ngo_features.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="nav-left">
+                <div class="logo">
+                    <a href="/">
+                        <img src="../static/images/NGO_Connect.png" alt="NGO Connect Logo">
+                    </a>
+                </div>
+                <ul class="nav-links">
+                    <li><a href="/about">About</a></li>
+                    <li><a href="/contact">Contact</a></li>
+                </ul>
+            </div>
+            <div class="nav-center">
+                <div class="options">
+                    <a class="option" href="/donate">Donate</a>
+                </div>
+            </div>
+            <div class="auth-buttons">
+                <a class="btn login" href="/login">Login</a>
+                <a class="btn signup" href="/register">Sign Up</a>
+            </div>
+        </nav>
+    </header>
+    {% include 'features_nav.html' %}
+    <main class="page-content" data-page="trust">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Volunteer Trust System</h1>
+                <p class="page-subtitle">Review volunteer trust profiles with circular trust scoring, star ratings, and consistency badges for stronger NGO engagement.</p>
+            </div>
+        </div>
+        <div class="trust-search section-card">
+            <div class="search-row">
+                <div class="field-group">
+                    <label for="trustSearch">Name Search</label>
+                    <input type="text" id="trustSearch" placeholder="Search volunteer name">
+                </div>
+                <div class="field-group">
+                    <label for="minScore">Score Minimum</label>
+                    <input type="number" id="minScore" min="0" max="100" placeholder="0">
+                </div>
+                <div class="field-group">
+                    <label for="maxScore">Score Maximum</label>
+                    <input type="number" id="maxScore" min="0" max="100" placeholder="100">
+                </div>
+            </div>
+        </div>
+        <div class="trust-grid" id="trustGrid"></div>
+    </main>
+    <footer><p>&copy; 2024 NGO Connect. All rights reserved.</p></footer>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="../static/ngo_features.js"></script>
+</body>
+</html>
