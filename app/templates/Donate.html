@@ -71,14 +71,28 @@
         <div class="volunteer-grid">
             <div class="ngo-list" id="ngoList"></div>
 
-            <div class="volunteer-panel">
-                <h3 id="panelNgoName">Select an NGO to volunteer</h3>
-                <p id="panelNgoDetails">Click the 🤝 Volunteer bubble on any NGO card to see what skills they need.</p>
-                <div id="panelSkillsNeeded" class="skills-needed"></div>
-                <textarea id="skillsInput" placeholder="Enter your skills here" rows="5"></textarea>
-                <button type="button" onclick="applyVolunteer()">Apply to Volunteer</button>
-                <p id="volunteerMessage" class="volunteer-msg"></p>
+        <div class="bg donate-page">
+            <div class="donate-search">
+                <input type="text" id="searchInput" placeholder="Search NGO to donate to">
+                <button type="button" onclick="searchNGOs()">Search</button>
             </div>
+            <div class="donate-layout">
+                <div class="ngo-list" id="ngoList"></div>
+                <div class="donation-section" id="donationSection" style="display:none;">
+                    <h3>Donate to <span id="ngoName">select an NGO</span></h3>
+                    <div class="donation-block">
+                        <h4>Donate Money</h4>
+                        <input type="number" id="amount" min="1" placeholder="Amount (min 1 INR)">
+                        <button type="button" onclick="donateMoney()">Donate Money</button>
+                    </div>
+                    <div class="donation-block">
+                        <h4>Donate Items</h4>
+                        <textarea id="items" placeholder="List items you want to donate" rows="5"></textarea>
+                        <button type="button" onclick="donateItems()">Donate Items</button>
+                    </div>
+                </div>
+            </div>
+        </div>
         </div>
 
     </div>
