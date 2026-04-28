@@ -5,5 +5,5 @@ bp = Blueprint("donate",__name__)
 @bp.route('/donate',methods=['GET','POST'])
 def donate():
     if request.method == 'GET':
-        return render_template("DonateMoney.html")
+        return render_template("Donate.html")
     

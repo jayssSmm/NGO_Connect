@@ -3,18 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Volunteer with NGOs</title>
+    <title>Donate to NGOs | NGO Connect</title>
     <link rel="stylesheet" href="../static/styles.css">
     <link rel="stylesheet" href="../static/utility.css">
 </head>
 <body>
 
-<!-- Auth Modal (from donate.html) -->
 <div id="auth-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:999; align-items:center; justify-content:center;">
-    <div style="background:#fff; border-radius:12px; padding:2rem 2.5rem; max-width:360px; width:90%; text-align:center; box-shadow: 0 8px 32px rgba(0,0,0,0.18);">
+    <div style="background:#fff; border-radius:12px; padding:2rem 2.5rem; max-width:360px; width:90%; text-align:center; box-shadow:0 8px 32px rgba(0,0,0,0.18);">
         <div style="font-size:2rem; margin-bottom:0.75rem;">🔒</div>
         <h3 style="margin:0 0 0.5rem; font-size:1.1rem; font-weight:600;">Login Required</h3>
-        <p style="margin:0 0 1.5rem; font-size:0.9rem; color:#666;">You need to be logged in to access this feature.</p>
+        <p style="margin:0 0 1.5rem; font-size:0.9rem; color:#666;">You need to be logged in to access donation features.</p>
         <div style="display:flex; gap:0.75rem; justify-content:center; flex-wrap:wrap;">
             <a href="/login" style="padding:0.55rem 1.4rem; background:#2563eb; color:#fff; border-radius:7px; text-decoration:none; font-size:0.9rem; font-weight:500;">Login</a>
             <a href="/register" style="padding:0.55rem 1.4rem; background:#f3f4f6; color:#374151; border-radius:7px; text-decoration:none; font-size:0.9rem; font-weight:500;">Sign Up</a>
@@ -36,7 +35,7 @@
         </div>
         <div class="nav-center">
             <div class="options">
-                <a class="option" href="/donate">Donate</a>
+                <a class="option" href="/">Volunteer</a>
             </div>
         </div>
         <div class="auth-buttons">
@@ -50,14 +49,14 @@
     <div class="bg volunteer-container">
 
         <div class="volunteer-search">
-            <input type="text" id="searchInput" placeholder="Search NGOs">
+            <input type="text" id="searchInput" placeholder="Search NGO to donate to">
             <button type="button" onclick="searchNGOs()">Search</button>
         </div>
 
         <div class="or-divider"></div>
 
         <div class="near-you">
-            <h3>Want to know NGOs near you?</h3>
+            <h3>Find NGOs near you to support</h3>
             <div class="coords-row">
                 <div class="coords-input-wrap">
                     <input type="text" id="coordsInput" placeholder="Write Location / Paste Coordinates">
@@ -71,28 +70,28 @@
         <div class="volunteer-grid">
             <div class="ngo-list" id="ngoList"></div>
 
-        <div class="bg donate-page">
-            <div class="donate-search">
-                <input type="text" id="searchInput" placeholder="Search NGO to donate to">
-                <button type="button" onclick="searchNGOs()">Search</button>
-            </div>
-            <div class="donate-layout">
-                <div class="ngo-list" id="ngoList"></div>
-                <div class="donation-section" id="donationSection" style="display:none;">
-                    <h3>Donate to <span id="ngoName">select an NGO</span></h3>
-                    <div class="donation-block">
-                        <h4>Donate Money</h4>
-                        <input type="number" id="amount" min="1" placeholder="Amount (min 1 INR)">
-                        <button type="button" onclick="donateMoney()">Donate Money</button>
-                    </div>
-                    <div class="donation-block">
-                        <h4>Donate Items</h4>
-                        <textarea id="items" placeholder="List items you want to donate" rows="5"></textarea>
-                        <button type="button" onclick="donateItems()">Donate Items</button>
-                    </div>
+            <div class="volunteer-panel" id="donationSection">
+                <h3 id="panelNgoName">Select an NGO to donate</h3>
+                <p id="panelNgoDetails">Choose an NGO from the list to see support options.</p>
+                
+                <div style="height: 1px; background: #e2e8f0; margin: 10px 0;"></div>
+
+                <div class="donation-block" style="display:flex; flex-direction:column; gap:10px;">
+                    <h4 style="margin:0; font-size:1rem; color:#1f2937;">Donate Money</h4>
+                    <input type="number" id="amount" min="1" placeholder="Amount (min 1 INR)" style="width:100%; padding:12px; border-radius:12px; border:1px solid #cbd5e1; box-sizing:border-box;">
+                    <button type="button" onclick="donateMoney()" style="width:100%; padding:12px; border:none; border-radius:12px; background:#2563eb; color:#fff; cursor:pointer; font-weight:500;">Donate Money</button>
                 </div>
+
+                <div style="height: 1px; background: #e2e8f0; margin: 15px 0;"></div>
+
+                <div class="donation-block" style="display:flex; flex-direction:column; gap:10px;">
+                    <h4 style="margin:0; font-size:1rem; color:#1f2937;">Donate Items</h4>
+                    <textarea id="items" placeholder="List items you want to donate (e.g. Clothes, Books)" rows="4" style="width:100%; padding:12px; border-radius:12px; border:1px solid #cbd5e1; font-family:inherit; resize:vertical; box-sizing:border-box;"></textarea>
+                    <button type="button" onclick="donateItems()" style="width:100%; padding:12px; border:none; border-radius:12px; background:#4f46e5; color:#fff; cursor:pointer; font-weight:500;">Donate Items</button>
+                </div>
+                
+                <p id="volunteerMessage" class="volunteer-msg" style="margin-top:10px; font-size:0.9rem;"></p>
             </div>
-        </div>
         </div>
 
     </div>
@@ -103,18 +102,13 @@
 </footer>
 
 <style>
+    /* Reusing your exact volunteer styles for layout consistency */
     .volunteer-container { display:flex; flex-direction:column; align-items:center; min-height:calc(100vh - 180px); padding:40px 18px 24px; gap:18px; }
-
-    /* search */
     .volunteer-search { display:flex; width:100%; max-width:1240px; gap:10px; justify-content:center; align-items:center; }
     .volunteer-search input { flex:1; min-width:0; padding:14px 16px; border-radius:12px; border:1px solid #cbd5e1; font-size:1rem; }
     .volunteer-search button { min-width:120px; padding:14px 18px; border:none; border-radius:12px; background:#4f46e5; color:#fff; font-size:1rem; cursor:pointer; }
-
-    /* or divider */
     .or-divider { width:100%; max-width:1240px; border-top:1px solid #e2e8f0; position:relative; line-height:0; margin:0 auto; }
     .or-divider::after { content:'OR'; position:absolute; top:-10px; left:50%; transform:translateX(-50%); background:#f8fafc; padding:0 14px; color:#475569; font-size:0.95rem; }
-
-    /* near you */
     .near-you { width:100%; max-width:1240px; display:flex; flex-direction:column; gap:12px; align-items:center; }
     .near-you h3 { margin:0; font-size:1.05rem; color:#1f2937; }
     .coords-row { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; align-items:center; width:100%; }
@@ -123,36 +117,17 @@
     .coords-input-wrap .inner-btn { position:absolute; top:50%; right:8px; transform:translateY(-50%); padding:8px 12px; border:none; border-radius:8px; background:#2563eb; color:#fff; cursor:pointer; font-size:0.85rem; white-space:nowrap; }
     .find-btn { min-width:180px; padding:14px 18px; border:none; border-radius:12px; background:#2563eb; color:#fff; font-size:1rem; cursor:pointer; }
     .location-message { margin:0; min-height:20px; font-size:0.95rem; text-align:center; }
-
-    /* two-column grid */
     .volunteer-grid { width:100%; max-width:1240px; display:grid; grid-template-columns:1fr 360px; gap:24px; align-items:start; }
-
-    /* ngo cards */
     .ngo-list { display:grid; gap:16px; }
     .ngo-item { padding:18px 20px; border-radius:18px; border:1px solid #e2e8f0; background:#fff; text-align:left; transition:transform .15s ease, box-shadow .15s ease; cursor: pointer; }
     .ngo-item:hover { transform:translateY(-2px); box-shadow:0 14px 35px rgba(15,23,42,.08); }
-    .ngo-item h4 { margin:0 0 6px; font-size:1.1rem; }
-    .ngo-item h4 a { text-decoration:none; color:#1f2937; }
-    .ngo-item h4 a:hover { text-decoration:underline; }
+    .ngo-item h4 { margin:0 0 6px; font-size:1.1rem; color:#1f2937; }
     .ngo-item p { margin:4px 0; color:#475569; font-size:0.95rem; }
-    .volunteer-bubble { display:inline-block; margin-top:10px; padding:5px 14px; border-radius:20px; background:#ede9fe; color:#4f46e5; font-size:0.85rem; font-weight:500; cursor:pointer; border:1px solid #c4b5fd; transition:background 0.15s; user-select:none; }
-    .volunteer-bubble:hover { background:#ddd6fe; }
-    .no-results { padding:22px; border-radius:18px; border:1px solid #e2e8f0; background:#f8fafc; color:#475569; }
-
-    /* right panel */
     .volunteer-panel { background:#fff; border:1px solid #e2e8f0; border-radius:20px; padding:24px; display:flex; flex-direction:column; gap:14px; position:sticky; top:160px; }
-    .volunteer-panel h3 { margin:0; font-size:1.1rem; color:#111827; }
-    .volunteer-panel p { margin:0; color:#475569; font-size:0.95rem; line-height:1.6; }
-    .skills-needed { background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; padding:14px; color:#334155; font-size:0.95rem; min-height:60px; }
-    .volunteer-panel textarea { width:100%; border:1px solid #cbd5e1; border-radius:14px; padding:12px 14px; resize:vertical; font-size:0.95rem; font-family:inherit; box-sizing:border-box; }
-    .volunteer-panel button { width:100%; padding:14px 18px; border:none; border-radius:14px; background:#4f46e5; color:#fff; font-size:1rem; cursor:pointer; font-weight:500; transition:background 0.15s; }
-    .volunteer-panel button:hover { background:#4338ca; }
-    .volunteer-msg { min-height:18px; font-size:0.95rem; margin:0; }
-
     @media(max-width:960px) { .volunteer-grid { grid-template-columns:1fr; } .volunteer-panel { position:static; } }
-    @media(max-width:720px) { .volunteer-search { flex-direction:column; } .coords-row { flex-direction:column; } .coords-input-wrap input { padding-right:16px; } .coords-input-wrap .inner-btn { position:static; transform:none; width:100%; margin-top:8px; text-align:center; } }
+    @media(max-width:720px) { .volunteer-search { flex-direction:column; } .coords-row { flex-direction:column; } .coords-input-wrap .inner-btn { position:static; transform:none; width:100%; margin-top:8px; text-align:center; } }
 </style>
 
-<script src="../static/Volunteer.js"></script>
+<script src="../static/Donate.js"></script>
 </body>
 </html>
