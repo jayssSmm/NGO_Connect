@@ -158,6 +158,16 @@ function displayNGOs(ngos, query = '') {
 /**
  * Updates the right-hand panel with the clicked NGO's details
  */
+function updateStepUI(step) {
+    ['si1','si2','si3'].forEach((id, index) => {
+        const el = document.getElementById(id);
+        el.classList.remove('active', 'done');
+
+        if (index + 1 < step) el.classList.add('done');
+        if (index + 1 === step) el.classList.add('active');
+    });
+}
+
 function selectNGO(ngo) {
     currentNGO = ngo;
     
@@ -184,16 +194,21 @@ function selectNGO(ngo) {
 /**
  * Triggers the pop-up modal and populates it with selected NGO data
  */
-function openDonateModal() {
+async function openDonateModal() {
     if (!currentNGO) {
-        alert('Please select an NGO from the list first.');
+        alert('Please select an NGO first.');
         return;
     }
-    
-    // Inject NGO metadata into the modal header
+
+    const isAuth = await checkAuth();
+    if (!isAuth) {
+        showModal(); // your login modal
+        return;
+    }
+
     document.getElementById('mh-name').textContent = 'Donate to ' + currentNGO.name;
     document.getElementById('mh-focus').textContent = "Impact: " + currentNGO.focus;
-    
+
     resetModalState();
     document.getElementById('overlay').classList.add('active');
 }
@@ -204,12 +219,15 @@ function openDonateModal() {
 function resetModalState() {
     showStep('step1');
     hideStep('step2');
+    hideStep('processing');
     hideStep('success');
+
+    updateStepUI(1);
+
     selAmt = 0;
     document.getElementById('pay-lbl').textContent = '0';
     document.getElementById('custom-amt').value = '';
-    
-    // Clear button selections
+
     document.querySelectorAll('.amt-btn').forEach(b => b.classList.remove('selected'));
 }
 
@@ -240,11 +258,12 @@ function customInput(inp) {
 
 function toStep2() {
     if (!selAmt || selAmt < 1) {
-        alert('Please select or enter a valid donation amount.');
+        alert('Enter valid amount');
         return;
     }
     hideStep('step1');
     showStep('step2');
+    updateStepUI(2);
 }
 
 /**
@@ -261,32 +280,60 @@ function fmtCard(inp) {
 async function toProcessing() {
     const donorName = document.getElementById('f-name').value.trim();
     if (!donorName) {
-        alert('Please enter the name on the card.');
+        alert('Enter name');
         return;
     }
 
-    // Optional: Record donation in the backend database
-    try {
-        await fetch('/api/donate', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({
-                ngo_name: currentNGO.name,
-                ngo_id: currentNGO.ngo_id,
-                amount: Number(selAmt)
-            })
-        });
-    } catch (err) {
-        console.error("Non-critical: Failed to log donation to server.");
-    }
-
-    // Switch to success screen and fill receipt data
     hideStep('step2');
-    document.getElementById('r-ngo').textContent = currentNGO.name;
-    document.getElementById('r-amt').textContent = '₹' + selAmt.toLocaleString('en-IN');
-    document.getElementById('r-txn').textContent = 'TXN-' + Math.random().toString(36).substring(2,8).toUpperCase();
-    showStep('success');
+    showStep('processing');
+    updateStepUI(3);
+
+    // fake progress animation
+    const steps = ['ps1','ps2','ps3','ps4'];
+    let i = 0;
+
+    const interval = setInterval(() => {
+        if (i < steps.length) {
+            document.getElementById(steps[i]).classList.add('active');
+            i++;
+        }
+    }, 500);
+
+    setTimeout(async () => {
+        clearInterval(interval);
+
+        // 🔥 Backend call
+        try {
+            await fetch('/api/donate', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                credentials: 'include',
+                body: JSON.stringify({
+                    ngo_id: currentNGO.ngo_id,
+                    amount: selAmt
+                })
+            });
+        } catch (e) {
+            console.log("Logging failed (non-critical)");
+        }
+
+        // Fill receipt
+        document.getElementById('r-ngo').textContent = currentNGO.name;
+        document.getElementById('r-loc').textContent = currentNGO.location || 'N/A';
+        document.getElementById('r-contact').textContent = currentNGO.contact || '+91 XXXXX XXXXX';
+        document.getElementById('r-nemail').textContent = currentNGO.email || 'ngo@email.com';
+        document.getElementById('r-dname').textContent = donorName;
+        document.getElementById('r-demail').textContent = document.getElementById('f-email').value || 'N/A';
+        document.getElementById('r-amt').textContent = '₹' + selAmt;
+        document.getElementById('r-freq').textContent = document.getElementById('freq').value;
+        document.getElementById('r-card').textContent = '**** **** **** ' + document.getElementById('f-card').value.slice(-4);
+        document.getElementById('r-date').textContent = new Date().toLocaleString();
+        document.getElementById('r-txn').textContent = 'TXN-' + Math.random().toString(36).substring(2,8).toUpperCase();
+
+        hideStep('processing');
+        showStep('success');
+
+    }, 2500);
 }
 
 // ── UTILITIES ────────────────────────────────────────────────────────
