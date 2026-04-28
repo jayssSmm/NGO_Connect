@@ -11,7 +11,7 @@ def get_user_donations():
     user_id = get_jwt_identity()
 
     donations = db.session.execute(
-        db.select(Donation).filter_by(user_id=user_id)
+        db.select(Donation).filter_by(user_id=user_id).where(Donation.amount != None)
     ).scalars().all()
 
     result = [

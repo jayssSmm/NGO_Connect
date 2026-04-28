@@ -1,10 +1,53 @@
-/**
- * NGO Connect - Donate Logic
- * Consolidates Search, Geolocation, Selection, and Multi-Step Payment Flow
- */
+let currentNGO = null; 
+let selAmt = 0; 
 
-let currentNGO = null; // Tracks the currently selected NGO object
-let selAmt = 0;        // Tracks the chosen donation amount
+async function donateItems() {
+    const itemsInput = document.getElementById('items');
+    const itemsText = itemsInput.value.trim();
+
+    // 🔒 Validate NGO
+    if (!currentNGO) {
+        alert('Please select an NGO first.');
+        return;
+    }
+
+    // 📝 Validate input
+    if (!itemsText) {
+        alert('Please enter the items you want to donate.');
+        return;
+    }
+
+    try {
+        const res = await fetch('/api/donate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+                ngo_id: currentNGO.ngo_id,
+                ngo_name: currentNGO.name,
+                item: itemsText   // ✅ matches backend
+            })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            throw new Error(data.error || 'Failed to donate items');
+        }
+
+        // 🎉 Success
+        alert(`Items donation recorded for ${currentNGO.name}!`);
+
+        // Clear input
+        itemsInput.value = '';
+
+    } catch (err) {
+        console.error(err);
+        alert(err.message || 'Something went wrong.');
+    }
+}
 
 // ── NGO FETCHING & API INTERACTION ──────────────────────────────────
 
