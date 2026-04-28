@@ -1,14 +1,32 @@
-let currentNGO = null;
+/**
+ * NGO Connect - Donate Logic
+ * Consolidates Search, Geolocation, Selection, and Multi-Step Payment Flow
+ */
 
-// ── NGO Fetching ──────────────────────────────────────────────
+let currentNGO = null; // Tracks the currently selected NGO object
+let selAmt = 0;        // Tracks the chosen donation amount
 
+// ── NGO FETCHING & API INTERACTION ──────────────────────────────────
+
+/**
+ * Fetches NGOs from the Flask backend
+ * @param {string} query - The search term
+ */
 async function fetchNGOs(query = '') {
     const url = '/api/ngos' + (query ? `?q=${encodeURIComponent(query)}` : '');
-    const res = await fetch(url, { credentials: 'same-origin' });
-    const payload = await res.json();
-    return res.ok ? (Array.isArray(payload) ? payload : []) : [];
+    try {
+        const res = await fetch(url, { credentials: 'same-origin' });
+        const payload = await res.json();
+        return res.ok ? (Array.isArray(payload) ? payload : []) : [];
+    } catch (err) {
+        console.error("Fetch error:", err);
+        return [];
+    }
 }
 
+/**
+ * Validates if the user is logged in via the backend
+ */
 async function checkAuth() {
     try {
         const res = await fetch('/api/auth/check', { credentials: 'same-origin' });
@@ -18,65 +36,64 @@ async function checkAuth() {
     }
 }
 
-// ── Search & Location ──────────────────────────────────────────────
+// ── SEARCH & GEOLOCATION ──────────────────────────────────────────────
 
-function setLocationMessage(text, error = true) {
-    const el = document.getElementById('locationMessage');
-    if (!el) return;
-    el.textContent = text || '';
-    el.style.color = error ? '#e53e3e' : '#166534';
-}
-
+/**
+ * Triggered by the Search button
+ */
 async function searchNGOs() {
-    const query = document.getElementById('searchInput').value.trim();
-    setLocationMessage('');
+    const queryInput = document.getElementById('searchInput');
+    const query = queryInput ? queryInput.value.trim() : '';
+    
+    // Clear any previous location messages
+    const locMsg = document.getElementById('locationMessage');
+    if (locMsg) locMsg.textContent = '';
+
     const ngos = await fetchNGOs(query);
     displayNGOs(ngos, query);
 }
 
+/**
+ * Captures user coordinates via Browser API
+ */
 function getLocation() {
+    const locMsg = document.getElementById('locationMessage');
     if (!navigator.geolocation) {
-        setLocationMessage('Geolocation is not supported.', true);
+        if (locMsg) locMsg.textContent = 'Geolocation not supported.';
         return;
     }
+
     navigator.geolocation.getCurrentPosition(
         pos => {
-            document.getElementById('coordsInput').value = `${pos.coords.latitude}, ${pos.coords.longitude}`;
-            setLocationMessage('Coordinates captured. Click Find.', false);
+            const coordsInput = document.getElementById('coordsInput');
+            if (coordsInput) {
+                coordsInput.value = `${pos.coords.latitude}, ${pos.coords.longitude}`;
+            }
+            if (locMsg) {
+                locMsg.textContent = 'Coordinates captured. Click Find.';
+                locMsg.style.color = '#166534';
+            }
         },
-        () => setLocationMessage('Unable to detect location.', true)
+        () => {
+            if (locMsg) locMsg.textContent = 'Unable to detect location.';
+        }
     );
 }
 
-async function findNearbyNGOs() {
-    const raw = document.getElementById('coordsInput').value.trim();
-    if (!raw.includes(',')) { setLocationMessage('Enter correct coordinates.', true); return; }
-    const [userLat, userLng] = raw.split(',').map(c => parseFloat(c.trim()));
-    const ngos = await fetchNGOs();
-    // Simplified distance filter (5km)
-    const nearby = ngos.filter(n => n.latitude && n.longitude && getDistance(userLat, userLng, n.latitude, n.longitude) <= 5);
-    setLocationMessage(nearby.length ? 'Showing NGOs near you.' : 'No nearby NGOs found.', !nearby.length);
-    displayNGOs(nearby, '');
-}
+// ── DISPLAY & DOM MANIPULATION ──────────────────────────────────────
 
-function getDistance(lat1, lng1, lat2, lng2) {
-    const R = 6371; 
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLng = (lng2 - lng1) * Math.PI / 180;
-    const a = Math.sin(dLat/2)**2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng/2)**2;
-    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
-
-// ── Display ────────────────────────────────────────────────────────
-
+/**
+ * Renders the list of NGOs in the left column
+ */
 function displayNGOs(ngos, query = '') {
     const list = document.getElementById('ngoList');
+    if (!list) return;
     list.innerHTML = '';
 
-    if (!ngos.length) {
+    if (ngos.length === 0) {
         const div = document.createElement('div');
         div.className = 'no-results';
-        div.textContent = query ? "Sorry, we can't find this NGO" : 'No NGOs available.';
+        div.textContent = query ? "Sorry, we can't find this NGO." : 'No NGOs available.';
         list.appendChild(div);
         return;
     }
@@ -89,104 +106,176 @@ function displayNGOs(ngos, query = '') {
             <p>📍 ${ngo.location}</p>
             <p>${ngo.focus}</p>
         `;
+        // When clicked, update the selection state and right panel
         item.addEventListener('click', () => selectNGO(ngo));
         list.appendChild(item);
     });
 }
 
+/**
+ * Updates the right-hand panel with the clicked NGO's details
+ */
 function selectNGO(ngo) {
     currentNGO = ngo;
-    document.getElementById('panelNgoName').textContent = `Support ${ngo.name}`;
-    document.getElementById('panelNgoDetails').textContent = `Focused on: ${ngo.focus}`;
-    setVolunteerMessage('');
+    
+    // Unhide the donation section
+    const section = document.getElementById('donationSection');
+    if (section) section.style.display = 'grid';
+
+    // Update labels in the right panel
+    const nameLabel = document.getElementById('ngoName');
+    const panelName = document.getElementById('panelNgoName');
+    const panelDetails = document.getElementById('panelNgoDetails');
+
+    if (nameLabel) nameLabel.textContent = ngo.name;
+    if (panelName) panelName.textContent = `Support ${ngo.name}`;
+    if (panelDetails) panelDetails.textContent = `Focused on: ${ngo.focus}`;
+    
+    // Reset any status messages
+    const volMsg = document.getElementById('volunteerMessage');
+    if (volMsg) volMsg.textContent = '';
 }
 
-// ── Donation Logic ──────────────────────────────────────────────────
+// ── MULTI-STEP MODAL (POP-UP) LOGIC ──────────────────────────────────
 
-async function donateMoney() {
-    if (!currentNGO) { alert('Please select an NGO first.'); return; }
+/**
+ * Triggers the pop-up modal and populates it with selected NGO data
+ */
+function openDonateModal() {
+    if (!currentNGO) {
+        alert('Please select an NGO from the list first.');
+        return;
+    }
     
-    const amount = document.getElementById('amount').value;
-    if (!amount || amount < 1) { alert('Minimum donation is 1 INR.'); return; }
+    // Inject NGO metadata into the modal header
+    document.getElementById('mh-name').textContent = 'Donate to ' + currentNGO.name;
+    document.getElementById('mh-focus').textContent = "Impact: " + currentNGO.focus;
+    
+    resetModalState();
+    document.getElementById('overlay').classList.add('active');
+}
 
+/**
+ * Resets the modal steps and inputs
+ */
+function resetModalState() {
+    showStep('step1');
+    hideStep('step2');
+    hideStep('success');
+    selAmt = 0;
+    document.getElementById('pay-lbl').textContent = '0';
+    document.getElementById('custom-amt').value = '';
+    
+    // Clear button selections
+    document.querySelectorAll('.amt-btn').forEach(b => b.classList.remove('selected'));
+}
+
+function closeModal() {
+    document.getElementById('overlay').classList.remove('active');
+}
+
+/**
+ * Handles predefined amount buttons
+ */
+function pickAmt(btn, amt) {
+    document.querySelectorAll('.amt-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    selAmt = amt;
+    document.getElementById('custom-amt').value = '';
+    document.getElementById('pay-lbl').textContent = amt.toLocaleString('en-IN');
+}
+
+/**
+ * Handles custom number input
+ */
+function customInput(inp) {
+    document.querySelectorAll('.amt-btn').forEach(b => b.classList.remove('selected'));
+    const val = parseFloat(inp.value);
+    selAmt = (val >= 1) ? val : 0;
+    document.getElementById('pay-lbl').textContent = selAmt ? selAmt.toLocaleString('en-IN') : '0';
+}
+
+function toStep2() {
+    if (!selAmt || selAmt < 1) {
+        alert('Please select or enter a valid donation amount.');
+        return;
+    }
+    hideStep('step1');
+    showStep('step2');
+}
+
+/**
+ * Formats card number input with spaces (XXXX XXXX...)
+ */
+function fmtCard(inp) {
+    let v = inp.value.replace(/\D/g,'').substring(0,16);
+    inp.value = v.replace(/(.{4})/g,'$1 ').trim();
+}
+
+/**
+ * Final step: Simulates processing and displays the dynamic receipt
+ */
+async function toProcessing() {
+    const donorName = document.getElementById('f-name').value.trim();
+    if (!donorName) {
+        alert('Please enter the name on the card.');
+        return;
+    }
+
+    // Optional: Record donation in the backend database
     try {
-        const res = await fetch('/api/donate', {
+        await fetch('/api/donate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
             body: JSON.stringify({
                 ngo_name: currentNGO.name,
                 ngo_id: currentNGO.ngo_id,
-                amount: Number(amount)
+                amount: Number(selAmt)
             })
         });
-
-        if (!res.ok) { alert('Failed to record donation.'); return; }
-        
-        // Trigger Dummy Payment
-        const scannerCode = `RAZORPAY_QR_${currentNGO.name.replace(/\s+/g, '_')}`;
-        alert(`Razorpay Dummy Scanner for ${currentNGO.name}:\n\n${scannerCode}\nAmount: ${amount} INR`);
-        
-        document.getElementById('amount').value = '';
-        setVolunteerMessage(`Thank you! Payment of ${amount} INR initiated.`, false);
     } catch (err) {
-        alert('Network error. Please try again.');
+        console.error("Non-critical: Failed to log donation to server.");
     }
+
+    // Switch to success screen and fill receipt data
+    hideStep('step2');
+    document.getElementById('r-ngo').textContent = currentNGO.name;
+    document.getElementById('r-amt').textContent = '₹' + selAmt.toLocaleString('en-IN');
+    document.getElementById('r-txn').textContent = 'TXN-' + Math.random().toString(36).substring(2,8).toUpperCase();
+    showStep('success');
 }
 
-async function donateItems() {
-    const authenticated = await checkAuth();
-    if (!authenticated) { showModal(); return; }
-    if (!currentNGO) { alert('Please select an NGO first.'); return; }
+// ── UTILITIES ────────────────────────────────────────────────────────
 
-    const items = document.getElementById('items').value.trim();
-    if (!items) { alert('Please list items to donate.'); return; }
-
-    // This would typically be a POST to /api/donate-items
-    alert(`Item list sent to ${currentNGO.name}. They will contact you for pickup/drop-off.`);
-    document.getElementById('items').value = '';
-    setVolunteerMessage('Item donation request submitted!', false);
-}
-
-function setVolunteerMessage(msg, error = false) {
-    const el = document.getElementById('volunteerMessage');
-    el.textContent = msg;
-    el.style.color = error ? '#e53e3e' : '#166534';
-}
-
-// ── Auth Modal & Header ─────────────────────────────────────────────
-
-function showModal() { document.getElementById('auth-modal').style.display = 'flex'; }
-function closeModal() { document.getElementById('auth-modal').style.display = 'none'; }
-
-async function updateHeaderOnLoad() {
-    const authenticated = await checkAuth();
-    const authButtons = document.querySelector('.auth-buttons');
-    if (!authButtons || !authenticated) return;
-    authButtons.innerHTML = `
-        <div class="hamburger" onclick="toggleUserMenu()" style="cursor:pointer;">☰ My Account</div>
-        <div class="user-menu" id="userMenu" style="display:none; position:absolute; background:#fff; border:1px solid #ddd; padding:10px; border-radius:8px;">
-            <a href="/dashboard" style="display:block; margin-bottom:5px;">Dashboard</a>
-            <a href="#" onclick="logout()">Logout</a>
-        </div>
-    `;
-}
-
-function toggleUserMenu() {
-    const menu = document.getElementById('userMenu');
-    if (menu) menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
-}
+function showStep(id) { document.getElementById(id).classList.remove('hidden'); }
+function hideStep(id) { document.getElementById(id).classList.add('hidden'); }
 
 async function logout() {
     await fetch('/logout', { method: 'POST', credentials: 'same-origin' });
     window.location.href = '/';
 }
 
+// ── INITIALIZATION ───────────────────────────────────────────────────
+
 window.onload = async function () {
+    // Initial fetch of NGOs
     const ngos = await fetchNGOs();
     displayNGOs(ngos);
-    updateHeaderOnLoad();
-    document.getElementById('auth-modal').addEventListener('click', function (e) {
-        if (e.target === this) closeModal();
-    });
+
+    // Close modal if user clicks the dark overlay background
+    const overlay = document.getElementById('overlay');
+    if (overlay) {
+        overlay.addEventListener('click', function (e) {
+            if (e.target === this) closeModal();
+        });
+    }
+    
+    // Close Auth modal on background click (legacy support)
+    const authModal = document.getElementById('auth-modal');
+    if (authModal) {
+        authModal.addEventListener('click', function(e) {
+            if (e.target === this) this.style.display = 'none';
+        });
+    }
 };
