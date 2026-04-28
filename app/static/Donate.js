@@ -104,67 +104,102 @@ function displayNGOs(ngos, query = '') {
     });
 }
 
-// ── Volunteer Panel ────────────────────────────────────────────────
-
-function openPanel(ngo) {
-    currentNGO = ngo;
-    document.getElementById('panelNgoName').textContent = ngo.name;
-    document.getElementById('panelNgoDetails').textContent = 'Skills this NGO is looking for:';
-    document.getElementById('panelSkillsNeeded').textContent = ngo.focus;
-    document.getElementById('skillsInput').value = '';
-    setVolunteerMessage('');
-}
-
-function closePanel() {
-    document.getElementById('volunteer-panel').classList.remove('open');
-    setTimeout(() => {
-        document.getElementById('volunteer-overlay').classList.remove('open');
-    }, 300);
-}
-
-function closePanelOnBackdrop(e) {
-    if (e.target === document.getElementById('volunteer-overlay')) closePanel();
-}
-
-// ── Apply ──────────────────────────────────────────────────────────
-
-async function applyVolunteer() {
-    const authenticated = await checkAuth();
-    if (!authenticated) { closePanel(); showModal(); return; }
-
-    const skills = document.getElementById('skillsInput').value.trim();
-    if (!skills) { setVolunteerMessage('Please add your skills before applying.', true); return; }
-
-    try {
-        const res = await fetch('/api/volunteer/apply', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({
-                ngo_id:         currentNGO.ngo_id,
-                ngo_name:       currentNGO.name,
-                skill_needed:   currentNGO.focus,
-                skill_provided: skills
-            })
-        });
-        if (!res.ok) { setVolunteerMessage('Failed to submit application. Please try again.', true); return; }
-    } catch (err) {
-        console.error(err);
-        setVolunteerMessage('Network error. Please try again.', true);
-        return;
+    function selectNGO(ngo) {
+        currentNGO = ngo;
+        document.getElementById('ngoName').textContent = ngo.name;
+        document.getElementById('donationSection').style.display = 'block';
     }
 
-    setVolunteerMessage(`Application sent to ${currentNGO.name}!`, false);
-    document.getElementById('skillsInput').value = '';
-}
+    async function logout() {
+        await fetch('/logout', {
+            method: 'POST',
+            credentials: 'same-origin'
+        });
+        window.location.href = '/';
+    }
 
-function setVolunteerMessage(msg, error = false) {
-    const el = document.getElementById('volunteerMessage');
-    el.textContent = msg;
-    el.style.color = error ? '#e53e3e' : '#166534';
-}
+    async function donateMoney() {
+        if (!currentNGO) {
+            alert('Please select an NGO first.');
+            return;
+        }
 
-// ── Auth Modal ─────────────────────────────────────────────────────
+        const amount = document.getElementById('amount').value;
+        if (!amount || amount < 1) {
+            alert('Minimum donation is 1 INR.');
+            return;
+        }
+        try {
+            const res = await fetch('/api/donate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body:  JSON.stringify({
+                    ngo_name: currentNGO.name,
+                    ngo_id:  currentNGO.ngo_id,   // make sure currentNGO has this field
+                    amount:  Number(amount)
+                })
+            });
+
+            if (!res.ok) {
+                alert('Failed to record donation. Please try again.');
+                return;
+            }
+        } catch (err) {
+            console.log(err)
+            alert('Network error. Please try again.');
+            return;
+        }
+
+        showRazorpayScanner(currentNGO, amount);
+    }
+
+    function showRazorpayScanner(ngo, amount) {
+        const scannerCode = `RAZORPAY_QR_CODE_${ngo.name.replace(/\s+/g, '_')}`;
+        alert('Razorpay Dummy Scanner for ' + ngo.name + ':\n\n' + scannerCode + '\nAmount: ' + amount + ' INR\n\nAfter scanning and payment, you will receive confirmation.');
+        setTimeout(() => processMoneyDonation(ngo, amount), 500);
+    }
+
+    async function processMoneyDonation(ngo, amount) {
+        const authenticated = await checkAuth();
+        let message = `Payment of ${amount} INR sent to ${ngo.name}. `;
+
+        if (authenticated) {
+            message += 'Confirmation received on both website and payment app.';
+        } else {
+            message += 'Confirmation received on payment app.';
+        }
+        alert(message);
+        document.getElementById('amount').value = '';
+    }
+
+    async function donateItemsBox() {
+        const authenticated = await checkAuth();
+        if (!authenticated) {
+            showModal();
+            return;
+        }
+    }
+
+    async function donateItems() {
+        const authenticated = await checkAuth();
+        if (!authenticated) {
+            showModal();
+            return;
+        }
+
+        if (!currentNGO) {
+            alert('Please select an NGO first.');
+            return;
+        }
+
+        const items = document.getElementById('items').value;
+        if (items.trim()) {
+            alert('Item list sent to ' + currentNGO.name + '. You will be notified of acceptance/rejection on your dashboard and email.');
+        } else {
+            alert('Please list items to donate.');
+        }
+    }
 
 function showModal() {
     const m = document.getElementById('auth-modal');
@@ -208,7 +243,7 @@ window.onload = async function () {
     displayNGOs(ngos);
     updateHeaderOnLoad();
 
-    document.getElementById('auth-modal').addEventListener('click', function (e) {
-        if (e.target === this) closeModal();
-    });
-};
+        document.getElementById('auth-modal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+    };
