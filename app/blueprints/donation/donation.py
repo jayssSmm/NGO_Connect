@@ -13,6 +13,7 @@ def donate():
     data = request.get_json()
 
     user_id = get_jwt_identity() 
+    ngo_name =  data.get('ngo_name')
     ngo_id  = data.get('ngo_id')
     amount  = data.get('amount')
     item    = data.get('item')
@@ -30,6 +31,7 @@ def donate():
         donation = Donation(
             user_id=uuid.UUID(user_id),
             ngo_id=uuid.UUID(ngo_id),
+            ngo_name=ngo_name,
             amount=amount if amount else None,
             item=item if item else None,
         )
@@ -38,5 +40,6 @@ def donate():
         return jsonify({'message': 'Donation recorded', 'donation_id': str(donation.donation_id)}), 201
 
     except Exception as e:
+        print(e)
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
