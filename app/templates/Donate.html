@@ -93,48 +93,131 @@
     </main>
 
 <div class="overlay" id="overlay">
-    <div class="modal">
-        <div class="modal-header">
-            <button class="close-btn" onclick="closeModal()">✕</button>
-            <h2 id="mh-name">Donate</h2>
-            <p id="mh-focus">Supporting a great cause</p>
-        </div>
-        <div class="modal-body">
-            <div id="step1">
-                <label style="font-size:12px; font-weight:600; margin-bottom:8px; display:block; color:#475569;">Select Amount (₹)</label>
-                <div class="amount-grid">
-                    <button class="amt-btn" onclick="pickAmt(this, 100)">₹100</button>
-                    <button class="amt-btn" onclick="pickAmt(this, 500)">₹500</button>
-                    <button class="amt-btn" onclick="pickAmt(this, 1000)">₹1000</button>
-                </div>
-                <input type="number" id="custom-amt" placeholder="Or type any amount" oninput="customInput(this)" style="width:100%; padding:12px; border:1.5px solid #e2e8f0; border-radius:10px; margin-bottom:15px; outline:none;">
-                <button class="pay-btn" onclick="toStep2()">Continue to Payment →</button>
-            </div>
-
-            <div id="step2" class="hidden">
-                <div style="margin-bottom:12px;">
-                    <input type="text" id="f-name" placeholder="Full Name on Card" style="width:100%; padding:12px; border:1.5px solid #e2e8f0; border-radius:10px; outline:none;">
-                </div>
-                <div style="margin-bottom:12px;">
-                    <input type="text" id="f-card" placeholder="Card Number (XXXX XXXX XXXX XXXX)" maxlength="19" oninput="fmtCard(this)" style="width:100%; padding:12px; border:1.5px solid #e2e8f0; border-radius:10px; outline:none;">
-                </div>
-                <button class="pay-btn" onclick="toProcessing()">🔒 Authorise ₹<span id="pay-lbl">0</span></button>
-            </div>
-
-            <div id="success" class="hidden" style="text-align:center;">
-                <div style="font-size:48px; margin-bottom:10px;">🎉</div>
-                <h3 style="color:#16a34a; margin-bottom:5px;">Donation Successful!</h3>
-                <p style="font-size:13px; color:#64748b; margin-bottom:15px;">A receipt has been generated for your records.</p>
-                <div class="receipt">
-                    <div class="rrow"><span>Recipient NGO</span><span id="r-ngo" style="font-weight:600;"></span></div>
-                    <div class="rrow"><span>Amount Paid</span><span id="r-amt" class="green"></span></div>
-                    <div class="rrow"><span>Transaction ID</span><span id="r-txn" style="font-family:'DM Mono', monospace; color:#6366f1;"></span></div>
-                    <div class="rrow"><span>Status</span><span style="color:#16a34a; font-weight:700;">VERIFIED</span></div>
-                </div>
-                <button class="pay-btn" style="background:#f1f5f9; color:#1e293b; margin-top:15px;" onclick="closeModal()">Close Window</button>
-            </div>
-        </div>
+  <div class="modal">
+    <div class="modal-header">
+      <button class="close-btn" onclick="closeModal()">✕</button>
+      <h2 id="mh-name">Donate</h2>
+      <p id="mh-focus">Supporting a great cause</p>
+      <span class="secure-badge">🔒 256-bit SSL Secured &nbsp;|&nbsp; Demo Mode</span>
     </div>
+
+    <div class="modal-body">
+
+      <!-- STEPS -->
+      <div class="steps" id="step-ind">
+        <div class="step-item active" id="si1"><div class="step-circle">1</div><span class="step-label">Amount</span></div>
+        <div class="step-item" id="si2"><div class="step-circle">2</div><span class="step-label">Details</span></div>
+        <div class="step-item" id="si3"><div class="step-circle">3</div><span class="step-label">Pay</span></div>
+      </div>
+
+      <!-- STEP 1 – AMOUNT -->
+      <div id="step1">
+        <div class="form-group">
+          <label>Select Donation Amount (₹) — Minimum ₹1</label>
+          <div class="amount-grid">
+            <button class="amt-btn" onclick="pickAmt(this,1)">₹1</button>
+            <button class="amt-btn" onclick="pickAmt(this,10)">₹10</button>
+            <button class="amt-btn" onclick="pickAmt(this,51)">₹51</button>
+            <button class="amt-btn" onclick="pickAmt(this,100)">₹100</button>
+            <button class="amt-btn" onclick="pickAmt(this,500)">₹500</button>
+            <button class="amt-btn" onclick="pickAmt(this,1000)">₹1,000</button>
+          </div>
+          <input type="number" id="custom-amt" placeholder="Or type any amount (min ₹1)" min="1" step="1" oninput="customInput(this)"/>
+        </div>
+        <div class="form-group">
+          <label>Frequency</label>
+          <select id="freq">
+            <option>One-time donation</option>
+            <option>Monthly recurring</option>
+            <option>Quarterly</option>
+            <option>Annually</option>
+          </select>
+        </div>
+        <button class="pay-btn" onclick="toStep2()">Continue →</button>
+        <p class="note">🏛️ Eligible for 80G tax exemption &nbsp;|&nbsp; No platform fee</p>
+      </div>
+
+      <!-- STEP 2 – DONOR DETAILS -->
+      <div id="step2" class="hidden">
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" id="f-name" placeholder="e.g. Arjun Banerjee"/>
+        </div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" id="f-email" placeholder="arjun@example.com"/>
+        </div>
+        <div class="form-group">
+          <label>Card Number</label>
+          <div class="card-wrap">
+            <input type="text" id="f-card" placeholder="4111 1111 1111 1111" maxlength="19" oninput="fmtCard(this)"/>
+            <span class="card-brand" id="cbrand">VISA</span>
+          </div>
+        </div>
+        <div class="row">
+          <div class="form-group" style="margin-bottom:0">
+            <label>Expiry</label>
+            <input type="text" id="f-exp" placeholder="MM / YY" maxlength="7" oninput="fmtExp(this)"/>
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label>CVV</label>
+            <input type="password" id="f-cvv" placeholder="•••" maxlength="4"/>
+          </div>
+        </div>
+        <button class="pay-btn" onclick="toProcessing()" style="margin-top:18px">
+          🔒 Pay ₹<span id="pay-lbl">0</span> Now
+        </button>
+        <p class="note">🛡 Card info is never stored or transmitted</p>
+      </div>
+
+      <!-- PROCESSING -->
+      <div class="processing hidden" id="processing">
+        <div class="spinner"></div>
+        <h3>Processing your donation…</h3>
+        <p>Please keep this window open</p>
+        <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+        <div class="proc-steps">
+          <div class="proc-step" id="ps1"><div class="proc-dot"></div>Verifying card details</div>
+          <div class="proc-step" id="ps2"><div class="proc-dot"></div>Connecting to payment gateway</div>
+          <div class="proc-step" id="ps3"><div class="proc-dot"></div>Authorising transaction</div>
+          <div class="proc-step" id="ps4"><div class="proc-dot"></div>Crediting NGO account</div>
+        </div>
+      </div>
+
+      <!-- SUCCESS / PAYMENT DONE -->
+      <div class="success-screen hidden" id="success">
+        <canvas class="confetti-canvas" id="confetti-canvas"></canvas>
+        <div class="success-inner">
+          <div class="success-anim">✅</div>
+          <h3>Payment Done!</h3>
+          <div class="paid-badge">✔ PAYMENT SUCCESSFUL</div>
+          <p class="success-tagline">Your donation has been received. You're making a difference! 🙏</p>
+
+          <div class="receipt">
+            <div class="receipt-title">🧾 Donation Receipt</div>
+            <div class="rrow"><span class="rlabel">NGO Name</span><span class="rval" id="r-ngo"></span></div>
+            <div class="rrow"><span class="rlabel">Location</span><span class="rval" id="r-loc"></span></div>
+            <div class="rrow"><span class="rlabel">NGO Contact</span><span class="rval" id="r-contact"></span></div>
+            <div class="rrow"><span class="rlabel">NGO Email</span><span class="rval" id="r-nemail"></span></div>
+            <div class="rrow"><span class="rlabel">Donor Name</span><span class="rval" id="r-dname"></span></div>
+            <div class="rrow"><span class="rlabel">Donor Email</span><span class="rval" id="r-demail"></span></div>
+            <div class="rrow"><span class="rlabel">Amount Paid</span><span class="rval green" id="r-amt"></span></div>
+            <div class="rrow"><span class="rlabel">Frequency</span><span class="rval" id="r-freq"></span></div>
+            <div class="rrow"><span class="rlabel">Card Used</span><span class="rval" id="r-card"></span></div>
+            <div class="rrow"><span class="rlabel">Date &amp; Time</span><span class="rval" id="r-date"></span></div>
+            <div class="rrow"><span class="rlabel">Transaction ID</span><span class="rval purple" id="r-txn"></span></div>
+            <div class="status-row">
+              <span class="rlabel" style="font-weight:700;color:#1e293b">Payment Status</span>
+              <span class="status-badge">✔ PAYMENT DONE</span>
+            </div>
+          </div>
+
+          <button class="done-btn" onclick="closeModal()">✕ Close &amp; Donate Again</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
 </div>
 
     <script src="../static/Donate.js"></script>
