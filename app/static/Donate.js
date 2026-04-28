@@ -1,4 +1,4 @@
-    let currentNGO = null;
+let currentNGO = null;
 
     async function fetchNGOs(query = '') {
         const url = '/api/ngos' + (query ? `?q=${encodeURIComponent(query)}` : '');
@@ -67,35 +67,7 @@
             alert('Please select an NGO first.');
             return;
         }
-
-        const amount = document.getElementById('amount').value;
-        if (!amount || amount < 1) {
-            alert('Minimum donation is 1 INR.');
-            return;
-        }
-        try {
-            const res = await fetch('/api/donate', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body:  JSON.stringify({
-                    ngo_name: currentNGO.name,
-                    ngo_id:  currentNGO.ngo_id,   // make sure currentNGO has this field
-                    amount:  Number(amount)
-                })
-            });
-
-            if (!res.ok) {
-                alert('Failed to record donation. Please try again.');
-                return;
-            }
-        } catch (err) {
-            console.log(err)
-            alert('Network error. Please try again.');
-            return;
-        }
-
-        showRazorpayScanner(currentNGO, amount);
+        window.location.href = '/donate-money';
     }
 
     function showRazorpayScanner(ngo, amount) {
