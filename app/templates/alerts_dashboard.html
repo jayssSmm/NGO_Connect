@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Alerts</title>
+    <link rel="stylesheet" href="../static/styles.css">
+    <link rel="stylesheet" href="../static/utility.css">
+    <link rel="stylesheet" href="../static/ngo_features.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="nav-left">
+                <div class="logo">
+                    <a href="/">
+                        <img src="../static/images/NGO_Connect.png" alt="NGO Connect Logo">
+                    </a>
+                </div>
+                <ul class="nav-links">
+                    <li><a href="/about">About</a></li>
+                    <li><a href="/contact">Contact</a></li>
+                </ul>
+            </div>
+            <div class="nav-center">
+                <div class="options">
+                    <a class="option" href="/donate">Donate</a>
+                </div>
+            </div>
+            <div class="auth-buttons">
+                <a class="btn login" href="/login">Login</a>
+                <a class="btn signup" href="/register">Sign Up</a>
+            </div>
+        </nav>
+    </header>
+    {% include 'features_nav.html' %}
+    <main class="page-content" data-page="alerts">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Real-Time Alerts</h1>
+                <p class="page-subtitle">Monitor current NGO alerts across Kolkata and filter quickly between all critical, warning, and info events.</p>
+            </div>
+            <div class="status-pill">
+                🔔 Unread Alerts: <span id="unreadCount">0</span>
+            </div>
+        </div>
+        <div class="alert-filter-bar">
+            <button type="button" data-alert-filter="All" class="active">All</button>
+            <button type="button" data-alert-filter="Critical">Critical</button>
+            <button type="button" data-alert-filter="Warning">Warning</button>
+            <button type="button" data-alert-filter="Info">Info</button>
+        </div>
+        <div id="alertsFeed" class="grid-two"></div>
+    </main>
+    <footer><p>&copy; 2024 NGO Connect. All rights reserved.</p></footer>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="../static/ngo_features.js"></script>
+</body>
+</html>

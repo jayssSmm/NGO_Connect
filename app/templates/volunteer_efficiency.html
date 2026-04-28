@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Volunteer Efficiency Tracker</title>
+    <link rel="stylesheet" href="../static/styles.css">
+    <link rel="stylesheet" href="../static/utility.css">
+    <link rel="stylesheet" href="../static/ngo_features.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="nav-left">
+                <div class="logo">
+                    <a href="/">
+                        <img src="../static/images/NGO_Connect.png" alt="NGO Connect Logo">
+                    </a>
+                </div>
+                <ul class="nav-links">
+                    <li><a href="/about">About</a></li>
+                    <li><a href="/contact">Contact</a></li>
+                </ul>
+            </div>
+            <div class="nav-center">
+                <div class="options">
+                    <a class="option" href="/donate">Donate</a>
+                </div>
+            </div>
+            <div class="auth-buttons">
+                <a class="btn login" href="/login">Login</a>
+                <a class="btn signup" href="/register">Sign Up</a>
+            </div>
+        </nav>
+    </header>
+    {% include 'features_nav.html' %}
+    <main class="page-content" data-page="efficiency">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Volunteer Efficiency Tracker</h1>
+                <p class="page-subtitle">Rank volunteers by task performance and track the top performer’s efficiency trend over the last six months.</p>
+            </div>
+        </div>
+        <div class="table-responsive section-card efficiency-panel">
+            <table class="table-core" id="efficiencyTable">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th class="sortable" data-key="name">Volunteer Name</th>
+                        <th class="sortable" data-key="tasks">Tasks Completed</th>
+                        <th class="sortable" data-key="hours">Hours Spent</th>
+                        <th class="sortable" data-key="efficiency">Efficiency Score</th>
+                        <th>Trust Badge</th>
+                    </tr>
+                </thead>
+                <tbody id="efficiencyBody"></tbody>
+            </table>
+        </div>
+        <div class="card-panel chart-card">
+            <h2>Top Volunteer Efficiency Trend</h2>
+            <canvas id="efficiencyTrendChart"></canvas>
+        </div>
+    </main>
+    <footer><p>&copy; 2024 NGO Connect. All rights reserved.</p></footer>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="../static/ngo_features.js"></script>
+</body>
+</html>

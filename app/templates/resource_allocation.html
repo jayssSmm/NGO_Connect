@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resource Allocation Optimizer</title>
+    <link rel="stylesheet" href="../static/styles.css">
+    <link rel="stylesheet" href="../static/utility.css">
+    <link rel="stylesheet" href="../static/ngo_features.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="nav-left">
+                <div class="logo">
+                    <a href="/">
+                        <img src="../static/images/NGO_Connect.png" alt="NGO Connect Logo">
+                    </a>
+                </div>
+                <ul class="nav-links">
+                    <li><a href="/about">About</a></li>
+                    <li><a href="/contact">Contact</a></li>
+                </ul>
+            </div>
+            <div class="nav-center">
+                <div class="options">
+                    <a class="option" href="/donate">Donate</a>
+                </div>
+            </div>
+            <div class="auth-buttons">
+                <a class="btn login" href="/login">Login</a>
+                <a class="btn signup" href="/register">Sign Up</a>
+            </div>
+        </nav>
+    </header>
+    {% include 'features_nav.html' %}
+    <main class="page-content" data-page="resources">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Resource Allocation Optimizer</h1>
+                <p class="page-subtitle">Allocate volunteers and budgets across Kolkata NGOs using a priority-based greedy optimizer to maximize impact.</p>
+            </div>
+            <div class="field-grid">
+                <div class="field-group">
+                    <label for="availableVolunteers">Available Volunteers</label>
+                    <input type="number" id="availableVolunteers" min="0" value="50">
+                </div>
+                <div class="field-group">
+                    <label for="totalBudget">Total Budget (₹)</label>
+                    <input type="number" id="totalBudget" min="0" value="550000">
+                </div>
+                <button id="optimizeButton" class="primary-btn">Optimize</button>
+            </div>
+        </div>
+        <div class="table-responsive section-card allocation-panel">
+            <h2>NGO Requests</h2>
+            <table class="table-core">
+                <thead>
+                    <tr>
+                        <th>NGO Name</th>
+                        <th>Requested Volunteers</th>
+                        <th>Requested Funds</th>
+                        <th>Priority Weight</th>
+                    </tr>
+                </thead>
+                <tbody id="allocationInputBody"></tbody>
+            </table>
+        </div>
+        <div class="grid-two">
+            <div class="table-responsive section-card allocation-panel">
+                <h2>Allocation Results</h2>
+                <table class="table-core">
+                    <thead>
+                        <tr>
+                            <th>NGO Name</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="allocationResults"></tbody>
+                </table>
+            </div>
+            <div class="card-panel chart-card">
+                <h2>Allocation Breakdown</h2>
+                <canvas id="allocationChart"></canvas>
+            </div>
+        </div>
+    </main>
+    <footer><p>&copy; 2024 NGO Connect. All rights reserved.</p></footer>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="../static/ngo_features.js"></script>
+</body>
+</html>
