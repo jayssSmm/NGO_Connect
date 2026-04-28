@@ -15,6 +15,36 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+async function checkAuth() {
+    try {
+        const res = await fetch('/api/auth/check', { credentials: 'same-origin' });
+        return res.ok; // Returns true if the user is logged in
+    } catch {
+        return false;
+    }
+}
+
+async function updateHeaderOnLoad() {
+    const authenticated = await checkAuth();
+    const authButtons = document.querySelector('.auth-buttons');
+
+    if (!authButtons || !authenticated) return;
+
+    // This line removes the Login/Signup buttons and adds the Account menu
+    authButtons.innerHTML = `
+        <div class="hamburger" onclick="toggleUserMenu()">☰ My Account</div>
+        <div class="user-menu" id="userMenu" style="display:none;">
+            <a href="/dashboard">Dashboard</a>
+            <a href="#" onclick="logout()">Logout</a>
+        </div>
+    `;
+}
+
+window.onload = async function () {
+    // ... other init code
+    updateHeaderOnLoad(); 
+};
+
 function initUrgency() {
     const ngos = [
         { name: 'Silver Years Care Foundation', severity: 85, people: 94, time: 78, gap: 82 },

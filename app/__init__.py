@@ -14,7 +14,7 @@ from app.blueprints.api import bp as api_bp
 from app.blueprints.volunteer.volunteer import bp as volunteer_bp
 from app.blueprints.volunteer.fetch_volunteer import bp as fetch_volunteer_bp
 from app.blueprints.volunteer.volunteer_applications import bp as volunteer_app_bp
-from app.routes.features_routes import features_bp
+from app.blueprints.features_routes import features_bp
 from app.models.user import User
 from app.models.ngo import NGO
 

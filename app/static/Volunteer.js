@@ -129,51 +129,78 @@ function closePanelOnBackdrop(e) {
 // ── Apply ──────────────────────────────────────────────────────────
 
 async function applyVolunteer() {
+    // 1. Check if an NGO is actually selected
+    if (!currentNGO) {
+        setVolunteerMessage('Please select an NGO first.', true);
+        return;
+    }
+
+    // 2. Check Auth
     const authenticated = await checkAuth();
-    if (!authenticated) { closePanel(); showModal(); return; }
+    if (!authenticated) {
+        showModal(); // Directly show the modal
+        return;
+    }
 
+    // 3. Check Input
     const skills = document.getElementById('skillsInput').value.trim();
-    if (!skills) { setVolunteerMessage('Please add your skills before applying.', true); return; }
+    if (!skills) {
+        setVolunteerMessage('Please add your skills before applying.', true);
+        return;
+    }
 
+    // 4. Submit
     try {
         const res = await fetch('/api/volunteer/apply', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
             body: JSON.stringify({
-                ngo_id:         currentNGO.ngo_id,
-                ngo_name:       currentNGO.name,
-                skill_needed:   currentNGO.focus,
+                ngo_id: currentNGO.ngo_id,
+                ngo_name: currentNGO.name,
+                skill_needed: currentNGO.focus,
                 skill_provided: skills
             })
         });
-        if (!res.ok) { setVolunteerMessage('Failed to submit application. Please try again.', true); return; }
+        if (!res.ok) {
+            setVolunteerMessage('Failed to submit application. Please try again.', true);
+            return;
+        }
+        
+        setVolunteerMessage(`Application sent to ${currentNGO.name}!`, false);
+        document.getElementById('skillsInput').value = '';
+        
     } catch (err) {
         console.error(err);
         setVolunteerMessage('Network error. Please try again.', true);
-        return;
     }
-
-    setVolunteerMessage(`Application sent to ${currentNGO.name}!`, false);
-    document.getElementById('skillsInput').value = '';
 }
 
 function setVolunteerMessage(msg, error = false) {
     const el = document.getElementById('volunteerMessage');
-    el.textContent = msg;
-    el.style.color = error ? '#e53e3e' : '#166534';
+    if (el) {
+        el.textContent = msg;
+        el.style.color = error ? '#e53e3e' : '#166534';
+    }
 }
 
 // ── Auth Modal ─────────────────────────────────────────────────────
 
 function showModal() {
-    const m = document.getElementById('auth-modal');
-    if (m) m.style.display = 'flex';
+    const modal = document.getElementById('auth-modal');
+    if (modal) {
+        modal.style.display = 'flex';
+        // Optional: prevent background scrolling
+        document.body.style.overflow = 'hidden';
+    }
 }
 
 function closeModal() {
-    const m = document.getElementById('auth-modal');
-    if (m) m.style.display = 'none';
+    const modal = document.getElementById('auth-modal');
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
 }
 
 // ── Header ─────────────────────────────────────────────────────────
