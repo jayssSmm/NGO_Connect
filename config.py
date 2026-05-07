@@ -1,7 +1,7 @@
-import multiprocessing
+
 import os
 
-workers=2*multiprocessing.cpu_count()+1
+workers=2
 worker_class='sync'
 worker_connections=1000
 
