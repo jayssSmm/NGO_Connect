@@ -4,3 +4,4 @@ dotenv
 redis
 flask_sqlalchemy
 psycopg2
+gunicorn
