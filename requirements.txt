@@ -1,7 +1,7 @@
 Flask
-Flask-JWT-Extended
+flask_jwt_extended
 python-dotenv
 redis
-Flask-SQLAlchemy
+flask_sqlalchemy
 psycopg2-binary
-gunicorn
+gunicorn==23.0.0
