@@ -16,7 +16,6 @@ bp = Blueprint("auth",__name__)
 
 OTP_TTL = 600
 
-
 @bp.route("/register", methods=['GET', 'POST'])
 def register():
     if request.method == 'GET':
@@ -79,8 +78,6 @@ def verify_otp():
         return jsonify({"error": "OTP expired. Please register again."}), 410
 
     pending = json.loads(raw)
-    print(pending)
-    print(type(pending.get('otp')))
 
     if str(entered_otp) != str(pending.get('otp')):
         return jsonify({"error": "Invalid OTP. Please try again."}), 400
