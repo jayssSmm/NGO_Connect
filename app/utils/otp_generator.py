@@ -1,4 +1,11 @@
-import secrets
+import random
+from datetime import datetime, timedelta
 
-def generate_otp(length: int = 6) -> str:
-    return "".join(str(secrets.randbelow(10)) for _ in range(length))
+
+def generate_otp() -> tuple[int, datetime]:
+
+    otp = random.randint(100000, 999999)
+
+    expiry_time = datetime.utcnow() + timedelta(minutes=10)
+
+    return otp, expiry_time

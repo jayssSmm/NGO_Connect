@@ -50,6 +50,14 @@ def create_app():
     app.register_blueprint(ping_bp)
 
     database_url = os.getenv("DATABASE_URL")
+
+    if not database_url:
+        app.logger.warning(
+        "DATABASE_URL is not set; using local SQLite database for development."
+        )
+    database_url = "sqlite:///ngo_connect.db"
+
+    app.config["SQLALCHEMY_DATABASE_URI"] = database_url
     if not database_url:
         app.logger.warning("DATABASE_URL is not set; using local SQLite fallback for development.")
 

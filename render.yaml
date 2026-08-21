@@ -1,0 +1,42 @@
+services:
+  - type: web
+    name: ngo-connect
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /ping
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ngo-connect-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          name: ngo-connect-cache
+          type: keyvalue
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: JWT_COOKIE_SECURE
+        value: "true"
+      - key: FLASK_ENV
+        value: production
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      - key: NGO_EMAIL
+        sync: false
+      - key: APP_PASSWORD
+        sync: false
+    # Render Key Value (Redis-compatible cache)
+  - type: keyvalue
+    name: ngo-connect-cache
+    plan: free
+    ipAllowList: []
+    maxmemoryPolicy: allkeys-lru
+    persistenceMode: "off"
+
+databases:
+  - name: ngo-connect-db
+    plan: free
