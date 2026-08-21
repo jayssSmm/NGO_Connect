@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard – NGO Connect</title>
+    <link rel="stylesheet" href="../static/styles.css">
+    <link rel="stylesheet" href="../static/utility.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="nav-left">
+                <div class="logo">
+                    <a href="/">
+                        <img src="../static/images/NGO_Connect.png" alt="NGO Connect Logo">
+                    </a>
+                </div>
+                <ul class="nav-links">
+                    <li><a href="/about">About</a></li>
+                    <li><a href="/contact">Contact</a></li>
+                </ul>
+            </div>
+            <div class="nav-center">
+                <div class="options">
+                    <a type="donate" class="option auth" href="/donate">Donate</a>
+                    <a class="option" href="/features">All Feature Pages</a>
+                </div>
+            </div>
+            <div class="auth-buttons">
+                <!-- Populated dynamically by updateHeaderOnLoad -->
+            </div>
+        </nav>
+    </header>
+    <main>
+        <div class="bg">
+            <h2>Welcome to Your Dashboard</h2>
+            <div class="dashboard-menu">
+                <div class="menu-item" onclick="showSection('impacts')">My Impacts</div>
+                <div class="menu-item" onclick="showSection('applications')">Volunteer Applications</div>
+            </div>
+            <div id="impacts" class="section active">
+                <h3>My Impacts</h3>
+                <div id="impactList">
+                </div>
+            </div>
+            <div id="applications" class="section">
+                <h3>Volunteer Applications</h3>
+                <div id="applicationList">
+                    <div class="application-item">
+                        <p>Applied to Green Earth NGO – Teaching children – Accepted</p>
+                    </div>
+                    <div class="application-item">
+                        <p>Applied to Child Care Foundation – Helping elderly – Pending</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <footer class="flex-all-center">
+        <p>Help as much as you can &#x1F60A;</p>
+    </footer>
+    <div id="donations-list"></div>
+    <script src="../static/dashboard.js"></script>
+    <script>
+        async function updateHeaderOnLoad() {
+            try {
+                const res = await fetch('/api/auth/check', { credentials: 'same-origin' });
+                const authButtons = document.querySelector('.auth-buttons');
+                if (!authButtons) return;
+
+                if (res.ok) {
+                    // Logged-in state: show account menu with dashboard + logout
+                    authButtons.innerHTML = `
+                        <div class="hamburger" onclick="toggleUserMenu()">☰ My Account</div>
+                        <div class="user-menu" id="userMenu" style="display:none;">
+                            <a href="/dashboard">Dashboard</a>
+                            <a href="#" onclick="logout()">Logout</a>
+                        </div>
+                    `;
+                } else {
+                    // Not logged in: redirect away from protected dashboard
+                    window.location.href = '/login';
+                }
+            } catch {
+                window.location.href = '/login';
+            }
+        }
+
+        function toggleUserMenu() {
+            const menu = document.getElementById('userMenu');
+            if (menu) {
+                menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+            }
+        }
+
+        async function logout() {
+            await fetch('/logout', {
+                method: 'POST',
+                credentials: 'same-origin'
+            });
+            window.location.href = '/';
+        }
+
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            const target = document.getElementById(sectionId);
+            if (target) target.classList.add('active');
+
+            // Close the mobile user menu if open
+            const menu = document.getElementById('userMenu');
+            if (menu) menu.style.display = 'none';
+        }
+
+        window.addEventListener('load', updateHeaderOnLoad);
+    </script>
+</body>
+</html>

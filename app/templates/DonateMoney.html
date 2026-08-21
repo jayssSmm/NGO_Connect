@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NGO Donation Portal – Kolkata</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:#f0f4f8;min-height:100vh;padding:40px 20px 60px}
+.page-header{text-align:center;margin-bottom:36px}
+.page-header h1{font-size:26px;font-weight:800;color:#1a202c}
+.page-header p{color:#64748b;font-size:14px;margin-top:6px}
+.category{margin-bottom:32px}
+.category-title{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px;padding-left:4px}
+.ngo-grid{display:flex;flex-wrap:wrap;gap:14px}
+.ngo-card{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:18px;width:220px;transition:box-shadow .2s,transform .2s}
+.ngo-card:hover{box-shadow:0 6px 24px rgba(0,0,0,.09);transform:translateY(-2px)}
+.ngo-icon{font-size:26px;margin-bottom:10px}
+.ngo-name{font-size:13px;font-weight:700;color:#1e293b;line-height:1.3}
+.ngo-focus{font-size:11px;color:#94a3b8;margin-top:3px;margin-bottom:10px;line-height:1.5}
+.ngo-meta{font-size:11px;color:#64748b;line-height:2;border-top:1px solid #f1f5f9;padding-top:10px;margin-bottom:12px}
+.ngo-meta span{display:block}
+.donate-btn{background:#6366f1;color:#fff;border:none;border-radius:10px;padding:9px 14px;font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer;width:100%;font-weight:700;transition:background .2s,transform .1s}
+.donate-btn:hover{background:#4f46e5}
+.donate-btn:active{transform:scale(.98)}
+
+/* ── OVERLAY & MODAL ── */
+.overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,.65);z-index:1000;align-items:center;justify-content:center;backdrop-filter:blur(6px)}
+.overlay.active{display:flex}
+.modal{background:#fff;border-radius:22px;width:100%;max-width:440px;overflow:hidden;position:relative;animation:slideUp .32s cubic-bezier(.16,1,.3,1);max-height:94vh;overflow-y:auto}
+@keyframes slideUp{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+.modal-header{background:linear-gradient(135deg,#6366f1 0%,#8b5cf6 100%);padding:22px 24px 20px;color:#fff;position:relative}
+.modal-header h2{font-size:17px;font-weight:700;line-height:1.3;padding-right:36px}
+.modal-header p{font-size:12px;opacity:.8;margin-top:3px}
+.close-btn{position:absolute;top:14px;right:14px;background:rgba(255,255,255,.2);border:none;color:#fff;width:30px;height:30px;border-radius:50%;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s}
+.close-btn:hover{background:rgba(255,255,255,.35)}
+.secure-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.15);border-radius:20px;padding:4px 10px;font-size:10px;margin-top:10px}
+.modal-body{padding:22px}
+
+/* ── STEPS ── */
+.steps{display:flex;gap:0;margin-bottom:22px}
+.step-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;position:relative}
+.step-item:not(:last-child)::after{content:'';position:absolute;top:12px;left:50%;width:100%;height:2px;background:#e2e8f0;z-index:0}
+.step-item.done::after,.step-item.active::after{background:#6366f1}
+.step-circle{width:24px;height:24px;border-radius:50%;background:#e2e8f0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#94a3b8;z-index:1;transition:all .3s}
+.step-item.done .step-circle{background:#6366f1;color:#fff}
+.step-item.active .step-circle{background:#6366f1;color:#fff;box-shadow:0 0 0 4px rgba(99,102,241,.2)}
+.step-label{font-size:10px;color:#94a3b8;font-weight:500}
+.step-item.active .step-label,.step-item.done .step-label{color:#6366f1}
+
+/* ── FORM ── */
+.form-group{margin-bottom:14px}
+label{display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:5px}
+input,select{width:100%;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 13px;font-size:13px;font-family:'DM Sans',sans-serif;color:#1e293b;outline:none;transition:border-color .2s,box-shadow .2s;background:#fff}
+input:focus,select:focus{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.12)}
+input::placeholder{color:#cbd5e1}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.amount-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:10px}
+.amt-btn{border:1.5px solid #e2e8f0;background:#f8fafc;border-radius:9px;padding:9px 6px;font-size:13px;font-weight:700;color:#374151;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif}
+.amt-btn:hover{border-color:#6366f1;color:#6366f1;background:#eef2ff}
+.amt-btn.selected{border-color:#6366f1;background:#eef2ff;color:#6366f1}
+.pay-btn{width:100%;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;border-radius:12px;padding:13px;font-size:15px;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .2s;margin-top:10px}
+.pay-btn:hover{opacity:.92;transform:translateY(-1px);box-shadow:0 6px 20px rgba(99,102,241,.4)}
+.pay-btn:active{transform:none;opacity:1}
+.note{font-size:11px;color:#94a3b8;text-align:center;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:4px}
+.card-wrap{position:relative}
+.card-wrap input{padding-right:56px}
+.card-brand{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:11px;font-weight:700;color:#6366f1;font-family:'DM Mono',monospace;background:#eef2ff;padding:2px 6px;border-radius:4px}
+
+/* ── PROCESSING ── */
+.processing{text-align:center;padding:10px 0}
+.spinner{width:54px;height:54px;border:4px solid #eef2ff;border-top-color:#6366f1;border-radius:50%;animation:spin .75s linear infinite;margin:0 auto 18px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.processing h3{font-size:17px;font-weight:700;color:#1e293b;margin-bottom:6px}
+.processing p{font-size:13px;color:#64748b}
+.progress-bar{width:100%;height:5px;background:#e2e8f0;border-radius:10px;margin:18px 0;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,#6366f1,#8b5cf6);border-radius:10px;width:0}
+.proc-steps{text-align:left;margin-top:14px}
+.proc-step{display:flex;align-items:center;gap:10px;padding:8px 0;font-size:12px;color:#94a3b8;border-bottom:1px solid #f1f5f9}
+.proc-step.ok{color:#374151}
+.proc-dot{width:8px;height:8px;border-radius:50%;background:#e2e8f0;flex-shrink:0;transition:background .4s}
+.proc-step.ok .proc-dot{background:#22c55e}
+
+/* ── SUCCESS ── */
+.success-screen{text-align:center;position:relative;overflow:hidden}
+.confetti-canvas{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0}
+.success-inner{position:relative;z-index:1}
+.success-anim{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#dcfce7,#bbf7d0);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:38px;animation:pop .5s cubic-bezier(.36,2,.6,1);box-shadow:0 4px 20px rgba(34,197,94,.25)}
+@keyframes pop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+.success-screen h3{font-size:24px;font-weight:800;color:#15803d;margin-bottom:4px;animation:fadeUp .5s ease .2s both}
+.paid-badge{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#16a34a,#22c55e);color:#fff;font-size:14px;font-weight:800;padding:8px 20px;border-radius:30px;margin:8px 0 16px;letter-spacing:.04em;box-shadow:0 4px 16px rgba(34,197,94,.4);animation:fadeUp .5s ease .35s both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.success-tagline{font-size:13px;color:#64748b;margin-bottom:18px;animation:fadeUp .5s ease .45s both}
+
+/* ── RECEIPT ── */
+.receipt{background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:14px;padding:16px;text-align:left;margin-bottom:18px;animation:fadeUp .5s ease .5s both}
+.receipt-title{font-size:11px;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.rrow{display:flex;justify-content:space-between;align-items:flex-start;padding:7px 0;font-size:12px;border-bottom:1px dashed #e8ecf0}
+.rrow:last-child{border-bottom:none;padding-top:10px}
+.rlabel{color:#64748b;min-width:110px;flex-shrink:0;font-size:11.5px}
+.rval{font-weight:600;color:#1e293b;font-family:'DM Mono',monospace;font-size:11px;text-align:right;word-break:break-all}
+.rval.green{color:#16a34a;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:800}
+.rval.purple{color:#6366f1;font-weight:700}
+.status-row{display:flex;justify-content:space-between;align-items:center;padding-top:10px;border-top:2px solid #e2e8f0;margin-top:4px}
+.status-badge{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#16a34a,#22c55e);color:#fff;font-weight:800;font-size:12px;padding:6px 14px;border-radius:20px;font-family:'DM Sans',sans-serif;box-shadow:0 2px 8px rgba(34,197,94,.35)}
+.done-btn{width:100%;background:#f1f5f9;color:#374151;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:background .2s;animation:fadeUp .5s ease .65s both}
+.done-btn:hover{background:#e2e8f0}
+.hidden{display:none!important}
+@media(max-width:520px){.ngo-grid{justify-content:center}.ngo-card{width:100%;max-width:340px}.modal{border-radius:16px 16px 0 0;max-height:96vh}.overlay{align-items:flex-end}}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>🤝 Support NGOs in Kolkata</h1>
+  <p>Every rupee counts — start from just ₹1. Choose an NGO and make your donation today.</p>
+</div>
+
+<!-- OLD AGE -->
+<div class="category">
+  <div class="category-title">👴 Old Age Care</div>
+  <div class="ngo-grid">
+    <div class="ngo-card">
+      <div class="ngo-icon">👴</div>
+      <div class="ngo-name">Silver Years Care Foundation</div>
+      <div class="ngo-focus">Elderly care, assisted living, medical support</div>
+      <div class="ngo-meta">
+        <span>📍 EM-4/2, Sector V, Salt Lake, Kolkata – 700091</span>
+        <span>📞 +91 9830456721</span>
+        <span>✉️ silveryears.care@gmail.com</span>
+        <span>🏛 Est. 2012</span>
+      </div>
+      <button class="donate-btn" onclick="openDonate('Silver Years Care Foundation','Elderly care, assisted living & medical support','Salt Lake, Sector V, Kolkata – 700091','silveryears.care@gmail.com','+91 9830456721')">Donate Now</button>
+    </div>
+    <div class="ngo-card">
+      <div class="ngo-icon">🧓</div>
+      <div class="ngo-name">Golden Age Support Trust</div>
+      <div class="ngo-focus">Old age homes, emotional support, healthcare camps</div>
+      <div class="ngo-meta">
+        <span>📍 45/2 Diamond Harbour Rd, Behala, Kolkata – 700034</span>
+        <span>📞 +91 9876543210</span>
+        <span>✉️ goldenage.support@ngo.org</span>
+        <span>🏛 Est. 2015</span>
+      </div>
+      <button class="donate-btn" onclick="openDonate('Golden Age Support Trust','Old age homes, emotional support & healthcare camps','Behala, Kolkata – 700034','goldenage.support@ngo.org','+91 9876543210')">Donate Now</button>
+    </div>
+  </div>
+</div>
+
+<!-- CHILDREN -->
+<div class="category">
+  <div class="category-title">👶 Children Welfare</div>
+  <div class="ngo-grid">
+    <div class="ngo-card">
+      <div class="ngo-icon">📖</div>
+      <div class="ngo-name">Bright Future Children Foundation</div>
+      <div class="ngo-focus">Child education, nutrition programs</div>
+      <div class="ngo-meta">
+        <span>📍 12 Netaji Subhash Rd, Dum Dum, Kolkata – 700028</span>
+        <span>📞 +91 9123456780</span>
+        <span>✉️ brightfuture.child@gmail.com</span>
+        <span>🏛 Est. 2014</span>
+      </div>
+      <button class="donate-btn" onclick="openDonate('Bright Future Children Foundation','Child education & nutrition programs','Dum Dum, Kolkata – 700028','brightfuture.child@gmail.com','+91 9123456780')">Donate Now</button>
+    </div>
+    <div class="ngo-card">
+      <div class="ngo-icon">😊</div>
+      <div class="ngo-name">Little Smiles Welfare Society</div>
+      <div class="ngo-focus">Orphan care, child welfare, adoption support</div>
+      <div class="ngo-meta">
+        <span>📍 22 Circus Ave, Park Circus, Kolkata – 700017</span>
+        <span>📞 +91 9007123456</span>
+        <span>✉️ littlesmiles.ws@gmail.com</span>
+        <span>🏛 Est. 2016</span>
+      </div>
+      <button class="donate-btn" onclick="openDonate('Little Smiles Welfare Society','Orphan care, child welfare & adoption support','Park Circus, Kolkata – 700017','littlesmiles.ws@gmail.com','+91 9007123456')">Donate Now</button>
+    </div>
+    <div class="ngo-card">
+      <div class="ngo-icon">🌟</div>
+      <div class="ngo-name">Hope for Every Child</div>
+      <div class="ngo-focus">Street children rehabilitation, education</div>
+      <div class="ngo-meta">
+        <span>📍 8/1 GT Road, Howrah – 711101</span>
+        <span>📞 +91 9432109876</span>
+        <span>✉️ hope.everychild@ngo.in</span>
+        <span>🏛 Est. 2013</span>
+      </div>
+      <button class="donate-btn" onclick="openDonate('Hope for Every Child','Street children rehabilitation & education','GT Road, Howrah – 711101','hope.everychild@ngo.in','+91 9432109876')">Donate Now</button>
+    </div>
+  </div>
+</div>
+
+<!-- ANIMALS -->
+<div class="category">
+  <div class="category-title">🐾 Animal Welfare</div>
+  <div class="ngo-grid">
+    <div class="ngo-card">
+      <div class="ngo-icon">🐕</div>
+      <div class="ngo-name">Paws &amp; Claws Rescue Foundation</div>
+      <div class="ngo-focus">Animal rescue, shelter, adoption</div>
+      <div class="ngo-meta">
+        <span>📍 Action Area 1, New Town, Kolkata – 700156</span>
+        <span>📞 +91 9831122334</span>
+        <span>✉️ pawsclaws.rescue@gmail.com</span>
+        <span>🏛 Est. 2018</span>
+      </div>
+      <button class="donate-btn" onclick="openDonate('Paws &amp; Claws Rescue Foundation','Animal rescue, shelter & adoption','New Town, Kolkata – 700156','pawsclaws.rescue@gmail.com','+91 9831122334')">Donate Now</button>
+    </div>
+    <div class="ngo-card">
+      <div class="ngo-icon">🐾</div>
+      <div class="ngo-name">Animal Care &amp; Protection Trust</div>
+      <div class="ngo-focus">Animal welfare, vaccination drives</div>
+      <div class="ngo-meta">
+        <span>📍 56 Tollygunge Circular Rd, Kolkata – 700033</span>
+        <span>📞 +91 9073456123</span>
+        <span>✉️ acpt.kolkata@ngo.org</span>
+        <span>🏛 Est. 2011</span>
+      </div>
+      <button class="donate-btn" onclick="openDonate('Animal Care &amp; Protection Trust','Animal welfare & vaccination drives','Tollygunge, Kolkata – 700033','acpt.kolkata@ngo.org','+91 9073456123')">Donate Now</button>
+    </div>
+  </div>
+</div>
+
+<!-- HEALTHCARE -->
+<div class="category">
+  <div class="category-title">🏥 Healthcare</div>
+  <div class="ngo-grid">
+    <div class="ngo-card">
+      <div class="ngo-icon">💊</div>
+      <div class="ngo-name">Lifeline Health Initiative</div>
+      <div class="ngo-focus">Free medical camps, rural healthcare</div>
+      <div class="ngo-meta">
+        <span>📍 10 Beliaghata Main Rd, Sealdah, Kolkata – 700014</span>
+        <span>📞 +91 9812345678</span>
+        <span>✉️ lifeline.health@ngo.in</span>
+        <span>🏛 Est. 2010</span>
+      </div>
+      <button class="donate-btn" onclick="openDonate('Lifeline Health Initiative','Free medical camps & rural healthcare','Sealdah, Kolkata – 700014','lifeline.health@ngo.in','+91 9812345678')">Donate Now</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDUCATION -->
+<div class="category">
+  <div class="category-title">📚 Education &amp; Development</div>
+  <div class="ngo-grid">
+    <div class="ngo-card">
+      <div class="ngo-icon">🎓</div>
+      <div class="ngo-name">Knowledge Bridge Foundation</div>
+      <div class="ngo-focus">Skill development, education programs</div>
+      <div class="ngo-meta">
+        <span>📍 33 Garia Main Road, Kolkata – 700084</span>
+        <span>📞 +91 9901234567</span>
+        <span>✉️ knowledge.bridge@gmail.com</span>
+        <span>🏛 Est. 2017</span>
+      </div>
+      <button class="donate-btn" onclick="openDonate('Knowledge Bridge Foundation','Skill development & education programs','Garia, Kolkata – 700084','knowledge.bridge@gmail.com','+91 9901234567')">Donate Now</button>
+    </div>
+    <div class="ngo-card">
+      <div class="ngo-icon">✏️</div>
+      <div class="ngo-name">Shiksha Udaan Trust</div>
+      <div class="ngo-focus">Rural education, digital literacy</div>
+      <div class="ngo-meta">
+        <span>📍 14 Jessore Road, Barasat – 700124</span>
+        <span>📞 +91 9087654321</span>
+        <span>✉️ shiksha.udaan@ngo.org</span>
+        <span>🏛 Est. 2019</span>
+      </div>
+      <button class="donate-btn" onclick="openDonate('Shiksha Udaan Trust','Rural education & digital literacy','Barasat, Greater Kolkata – 700124','shiksha.udaan@ngo.org','+91 9087654321')">Donate Now</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ====== MODAL ====== -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <button class="close-btn" onclick="closeModal()">✕</button>
+      <h2 id="mh-name">Donate</h2>
+      <p id="mh-focus">Supporting a great cause</p>
+      <span class="secure-badge">🔒 256-bit SSL Secured &nbsp;|&nbsp; Demo Mode</span>
+    </div>
+
+    <div class="modal-body">
+
+      <!-- STEPS -->
+      <div class="steps" id="step-ind">
+        <div class="step-item active" id="si1"><div class="step-circle">1</div><span class="step-label">Amount</span></div>
+        <div class="step-item" id="si2"><div class="step-circle">2</div><span class="step-label">Details</span></div>
+        <div class="step-item" id="si3"><div class="step-circle">3</div><span class="step-label">Pay</span></div>
+      </div>
+
+      <!-- STEP 1 – AMOUNT -->
+      <div id="step1">
+        <div class="form-group">
+          <label>Select Donation Amount (₹) — Minimum ₹1</label>
+          <div class="amount-grid">
+            <button class="amt-btn" onclick="pickAmt(this,1)">₹1</button>
+            <button class="amt-btn" onclick="pickAmt(this,10)">₹10</button>
+            <button class="amt-btn" onclick="pickAmt(this,51)">₹51</button>
+            <button class="amt-btn" onclick="pickAmt(this,100)">₹100</button>
+            <button class="amt-btn" onclick="pickAmt(this,500)">₹500</button>
+            <button class="amt-btn" onclick="pickAmt(this,1000)">₹1,000</button>
+          </div>
+          <input type="number" id="custom-amt" placeholder="Or type any amount (min ₹1)" min="1" step="1" oninput="customInput(this)"/>
+        </div>
+        <div class="form-group">
+          <label>Frequency</label>
+          <select id="freq">
+            <option>One-time donation</option>
+            <option>Monthly recurring</option>
+            <option>Quarterly</option>
+            <option>Annually</option>
+          </select>
+        </div>
+        <button class="pay-btn" onclick="toStep2()">Continue →</button>
+        <p class="note">🏛️ Eligible for 80G tax exemption &nbsp;|&nbsp; No platform fee</p>
+      </div>
+
+      <!-- STEP 2 – DONOR DETAILS -->
+      <div id="step2" class="hidden">
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" id="f-name" placeholder="e.g. Arjun Banerjee"/>
+        </div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" id="f-email" placeholder="arjun@example.com"/>
+        </div>
+        <div class="form-group">
+          <label>Card Number</label>
+          <div class="card-wrap">
+            <input type="text" id="f-card" placeholder="4111 1111 1111 1111" maxlength="19" oninput="fmtCard(this)"/>
+            <span class="card-brand" id="cbrand">VISA</span>
+          </div>
+        </div>
+        <div class="row">
+          <div class="form-group" style="margin-bottom:0">
+            <label>Expiry</label>
+            <input type="text" id="f-exp" placeholder="MM / YY" maxlength="7" oninput="fmtExp(this)"/>
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label>CVV</label>
+            <input type="password" id="f-cvv" placeholder="•••" maxlength="4"/>
+          </div>
+        </div>
+        <button class="pay-btn" onclick="toProcessing()" style="margin-top:18px">
+          🔒 Pay ₹<span id="pay-lbl">0</span> Now
+        </button>
+        <p class="note">🛡 Card info is never stored or transmitted</p>
+      </div>
+
+      <!-- PROCESSING -->
+      <div class="processing hidden" id="processing">
+        <div class="spinner"></div>
+        <h3>Processing your donation…</h3>
+        <p>Please keep this window open</p>
+        <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+        <div class="proc-steps">
+          <div class="proc-step" id="ps1"><div class="proc-dot"></div>Verifying card details</div>
+          <div class="proc-step" id="ps2"><div class="proc-dot"></div>Connecting to payment gateway</div>
+          <div class="proc-step" id="ps3"><div class="proc-dot"></div>Authorising transaction</div>
+          <div class="proc-step" id="ps4"><div class="proc-dot"></div>Crediting NGO account</div>
+        </div>
+      </div>
+
+      <!-- SUCCESS / PAYMENT DONE -->
+      <div class="success-screen hidden" id="success">
+        <canvas class="confetti-canvas" id="confetti-canvas"></canvas>
+        <div class="success-inner">
+          <div class="success-anim">✅</div>
+          <h3>Payment Done!</h3>
+          <div class="paid-badge">✔ PAYMENT SUCCESSFUL</div>
+          <p class="success-tagline">Your donation has been received. You're making a difference! 🙏</p>
+
+          <div class="receipt">
+            <div class="receipt-title">🧾 Donation Receipt</div>
+            <div class="rrow"><span class="rlabel">NGO Name</span><span class="rval" id="r-ngo"></span></div>
+            <div class="rrow"><span class="rlabel">Location</span><span class="rval" id="r-loc"></span></div>
+            <div class="rrow"><span class="rlabel">NGO Contact</span><span class="rval" id="r-contact"></span></div>
+            <div class="rrow"><span class="rlabel">NGO Email</span><span class="rval" id="r-nemail"></span></div>
+            <div class="rrow"><span class="rlabel">Donor Name</span><span class="rval" id="r-dname"></span></div>
+            <div class="rrow"><span class="rlabel">Donor Email</span><span class="rval" id="r-demail"></span></div>
+            <div class="rrow"><span class="rlabel">Amount Paid</span><span class="rval green" id="r-amt"></span></div>
+            <div class="rrow"><span class="rlabel">Frequency</span><span class="rval" id="r-freq"></span></div>
+            <div class="rrow"><span class="rlabel">Card Used</span><span class="rval" id="r-card"></span></div>
+            <div class="rrow"><span class="rlabel">Date &amp; Time</span><span class="rval" id="r-date"></span></div>
+            <div class="rrow"><span class="rlabel">Transaction ID</span><span class="rval purple" id="r-txn"></span></div>
+            <div class="status-row">
+              <span class="rlabel" style="font-weight:700;color:#1e293b">Payment Status</span>
+              <span class="status-badge">✔ PAYMENT DONE</span>
+            </div>
+          </div>
+
+          <button class="done-btn" onclick="closeModal()">✕ Close &amp; Donate Again</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  let selAmt = 0;
+  let ngoData = {};
+
+  function openDonate(name, focus, loc, email, phone) {
+    ngoData = {name, focus, loc, email, phone};
+    document.getElementById('mh-name').textContent = 'Donate to ' + name;
+    document.getElementById('mh-focus').textContent = focus;
+    reset();
+    document.getElementById('overlay').classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal() {
+    document.getElementById('overlay').classList.remove('active');
+    document.body.style.overflow = '';
+    stopConfetti();
+  }
+
+  function reset() {
+    show('step1'); hide('step2'); hide('success'); hide('processing');
+    document.getElementById('step-ind').style.display = 'flex';
+    setStep(1); selAmt = 0;
+    document.querySelectorAll('.amt-btn').forEach(b => b.classList.remove('selected'));
+    ['custom-amt','f-name','f-email','f-card','f-exp','f-cvv'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    document.getElementById('pay-lbl').textContent = '0';
+    document.getElementById('cbrand').textContent = 'VISA';
+    ['ps1','ps2','ps3','ps4'].forEach(id => {
+      const el = document.getElementById(id);
+      el.classList.remove('ok');
+      el.querySelector('.proc-dot').style.background = '#e2e8f0';
+    });
+  }
+
+  function pickAmt(btn, amt) {
+    document.querySelectorAll('.amt-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    selAmt = amt;
+    document.getElementById('custom-amt').value = '';
+    document.getElementById('pay-lbl').textContent = amt.toLocaleString('en-IN');
+  }
+
+  function customInput(inp) {
+    document.querySelectorAll('.amt-btn').forEach(b => b.classList.remove('selected'));
+    const v = parseFloat(inp.value);
+    selAmt = (v >= 1) ? v : 0;
+    document.getElementById('pay-lbl').textContent = selAmt ? selAmt.toLocaleString('en-IN') : '0';
+  }
+
+  function toStep2() {
+    if (!selAmt || selAmt < 1) { alert('Please select or enter an amount (minimum ₹1).'); return; }
+    hide('step1'); show('step2'); setStep(2);
+    document.getElementById('pay-lbl').textContent = selAmt.toLocaleString('en-IN');
+  }
+
+  function fmtCard(inp) {
+    let v = inp.value.replace(/\D/g,'').substring(0,16);
+    inp.value = v.replace(/(.{4})/g,'$1 ').trim();
+    const b = document.getElementById('cbrand');
+    if (!v) { b.textContent = 'CARD'; return; }
+    b.textContent = v[0]==='4'?'VISA': v[0]==='5'?'MC':
+      (v.startsWith('34')||v.startsWith('37'))?'AMEX':
+      v.startsWith('6')?'RUPAY':'CARD';
+  }
+
+  function fmtExp(inp) {
+    let v = inp.value.replace(/\D/g,'');
+    if (v.length >= 2) v = v.substring(0,2) + ' / ' + v.substring(2,4);
+    inp.value = v;
+  }
+
+  function toProcessing() {
+    const name  = document.getElementById('f-name').value.trim();
+    const email = document.getElementById('f-email').value.trim();
+    const card  = document.getElementById('f-card').value.replace(/\s/g,'');
+    if (!name)               { alert('Please enter your full name.'); return; }
+    if (!email.includes('@')){ alert('Please enter a valid email address.'); return; }
+    if (card.length < 12)    { alert('Please enter a valid card number (at least 12 digits).'); return; }
+
+    hide('step2');
+    document.getElementById('step-ind').style.display = 'none';
+    show('processing');
+    setStep(3);
+
+    // Animate progress bar
+    const fill = document.getElementById('prog-fill');
+    fill.style.width = '0';
+    fill.style.transition = 'none';
+    setTimeout(() => {
+      fill.style.transition = 'width 3.2s ease';
+      fill.style.width = '100%';
+    }, 50);
+
+    // Tick processing steps
+    ['ps1','ps2','ps3','ps4'].forEach((id,i) => {
+      setTimeout(() => {
+        const el = document.getElementById(id);
+        el.classList.add('ok');
+        el.querySelector('.proc-dot').style.background = '#22c55e';
+      }, 700 * (i + 1));
+    });
+
+    setTimeout(() => {
+      hide('processing');
+      showSuccess(name, email, card);
+    }, 3400);
+  }
+
+  function showSuccess(donorName, donorEmail, card) {
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})
+      + '  ' + now.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    const last4 = card.slice(-4);
+    const txnId = 'TXN' + Math.random().toString(36).substring(2,6).toUpperCase()
+                + Date.now().toString().slice(-8);
+
+    document.getElementById('r-ngo').textContent     = ngoData.name;
+    document.getElementById('r-loc').textContent     = ngoData.loc;
+    document.getElementById('r-contact').textContent = ngoData.phone;
+    document.getElementById('r-nemail').textContent  = ngoData.email;
+    document.getElementById('r-dname').textContent   = donorName;
+    document.getElementById('r-demail').textContent  = donorEmail;
+    document.getElementById('r-amt').textContent     = '₹ ' + selAmt.toLocaleString('en-IN');
+    document.getElementById('r-freq').textContent    = document.getElementById('freq').value;
+    document.getElementById('r-card').textContent    = '•••• •••• •••• ' + last4;
+    document.getElementById('r-date').textContent    = dateStr;
+    document.getElementById('r-txn').textContent     = txnId;
+
+    show('success');
+    startConfetti();
+  }
+
+  function setStep(n) {
+    [1,2,3].forEach(i => {
+      const el = document.getElementById('si'+i);
+      el.classList.remove('active','done');
+      if (i < n) el.classList.add('done');
+      if (i === n) el.classList.add('active');
+    });
+  }
+
+  function show(id){ document.getElementById(id).classList.remove('hidden'); }
+  function hide(id){ document.getElementById(id).classList.add('hidden'); }
+
+  document.getElementById('overlay').addEventListener('click', e => {
+    if (e.target.id === 'overlay') closeModal();
+  });
+
+  // ── CONFETTI ──
+  let confettiAnim = null;
+  const COLORS = ['#6366f1','#8b5cf6','#22c55e','#f59e0b','#ec4899','#06b6d4','#f97316'];
+
+  function startConfetti() {
+    const canvas = document.getElementById('confetti-canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight || 320;
+
+    const pieces = Array.from({length: 80}, () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height - canvas.height,
+      w: Math.random() * 9 + 5,
+      h: Math.random() * 5 + 3,
+      color: COLORS[Math.floor(Math.random()*COLORS.length)],
+      rot: Math.random() * Math.PI * 2,
+      vx: (Math.random() - 0.5) * 2,
+      vy: Math.random() * 3 + 1.5,
+      vr: (Math.random() - 0.5) * 0.15,
+      alpha: 1
+    }));
+
+    let frame = 0;
+    function loop() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      pieces.forEach(p => {
+        p.x += p.vx; p.y += p.vy; p.rot += p.vr;
+        if (frame > 90) p.alpha = Math.max(0, p.alpha - 0.012);
+        ctx.save();
+        ctx.globalAlpha = p.alpha;
+        ctx.translate(p.x + p.w/2, p.y + p.h/2);
+        ctx.rotate(p.rot);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+        ctx.restore();
+        if (p.y > canvas.height) { p.y = -10; p.x = Math.random() * canvas.width; p.alpha = 1; }
+      });
+      frame++;
+      if (frame < 200) confettiAnim = requestAnimationFrame(loop);
+      else ctx.clearRect(0,0,canvas.width,canvas.height);
+    }
+    confettiAnim = requestAnimationFrame(loop);
+  }
+
+  function stopConfetti() {
+    if (confettiAnim) { cancelAnimationFrame(confettiAnim); confettiAnim = null; }
+    const canvas = document.getElementById('confetti-canvas');
+    if (canvas) canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);
+  }
+</script>
+</body>
+</html>
